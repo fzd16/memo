@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="好幫手備忘錄">
+<meta name="theme-color" content="#FAF8F5">
+<title>好幫手備忘錄</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body { height:100%; }
+  body {
+    font-family:-apple-system,"PingFang TC","Noto Sans TC",sans-serif;
+    background:#FAF8F5; color:#2B2B2B; overscroll-behavior:none;
+    padding-bottom:calc(96px + env(safe-area-inset-bottom));
+  }
+  button { font-family:inherit; border:none; background:none; cursor:pointer; }
+
+  /* ===== header ===== */
+  .app-header { padding:calc(14px + env(safe-area-inset-top)) 18px 4px; }
+  .app-header .date { font-size:13px; color:#9a938a; font-weight:600; }
+  .app-header h1 { font-size:23px; font-weight:800; margin-top:2px; }
+
+  /* ===== chips ===== */
+  .chips { display:flex; gap:8px; padding:12px 18px 4px; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  .chip { flex-shrink:0; font-size:13px; padding:7px 13px; border-radius:20px; background:#fff; border:1px solid #e2ddd4; color:#5a5a5a; font-weight:600; }
+  .chip.active { background:#2B2B2B; color:#fff; border-color:#2B2B2B; }
+
+  /* ===== cards ===== */
+  .tasks { padding:12px 14px 8px; display:flex; flex-direction:column; gap:10px; }
+  .group-label { font-size:13px; font-weight:800; color:#9a938a; margin:6px 4px 0; }
+  .group-label.red { color:#C4452F; }
+  .card { background:#fff; border-radius:16px; padding:13px 13px 11px; border:1px solid #eee7dc; box-shadow:0 1px 3px rgba(0,0,0,.04); }
+  .card.overdue { border:1.5px solid #E05A4E; background:#FFF6F5; }
+  .card.donecard { opacity:.62; }
+  .card-top { display:flex; align-items:flex-start; gap:10px; }
+  .checkbox { width:27px; height:27px; border-radius:50%; border:2px solid #cfc8bc; flex-shrink:0; background:#fff; }
+  .checkbox.done { border-color:#3E9C6C; background:#3E9C6C; position:relative; }
+  .checkbox.done::after { content:"✓"; color:#fff; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:800; }
+  .card-title { font-size:16px; font-weight:700; line-height:1.45; flex:1; padding-top:2px; word-break:break-all; }
+  .card-title.done { color:#b5aea3; text-decoration:line-through; }
+  .more-btn { color:#b5aea3; font-size:19px; padding:0 4px; line-height:1.2; }
+  .badges { display:flex; gap:6px; margin-top:8px; margin-left:37px; flex-wrap:wrap; }
+  .badge { font-size:12px; padding:3px 9px; border-radius:12px; font-weight:600; }
+  .b-time { background:#F3EFE8; color:#7a7263; }
+  .b-alert { background:#FDEBE9; color:#C4452F; }
+  .overdue-tag { font-size:12px; color:#C4452F; font-weight:700; margin-left:37px; margin-top:6px; }
+  .shoplist { margin:9px 0 2px 37px; display:flex; flex-direction:column; gap:7px; }
+  .shopitem { display:flex; align-items:center; gap:9px; font-size:15px; color:#4a4a4a; }
+  .sq { width:20px; height:20px; border-radius:6px; border:2px solid #cfc8bc; flex-shrink:0; background:#fff; }
+  .sq.done { background:#3E9C6C; border-color:#3E9C6C; position:relative; }
+  .sq.done::after { content:"✓"; color:#fff; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; }
+  .shopitem .txt.done { color:#b5aea3; text-decoration:line-through; }
+  .empty-state { text-align:center; color:#b5aea3; font-size:14.5px; padding:44px 20px; line-height:1.9; }
+
+  /* ===== calendar page ===== */
+  .strip { display:flex; gap:6px; padding:10px 14px 12px; overflow-x:auto; -webkit-overflow-scrolling:touch; position:sticky; top:0; background:#FAF8F5; z-index:5; border-bottom:1px solid #eee7dc; }
+  .pill { flex-shrink:0; width:48px; border-radius:13px; background:#fff; border:1px solid #eee7dc; text-align:center; padding:7px 0 6px; }
+  .pill .w { font-size:10px; color:#9a938a; font-weight:700; }
+  .pill .n { font-size:16px; font-weight:800; margin:1px 0; }
+  .pill .dots { display:flex; gap:2px; justify-content:center; min-height:6px; }
+  .pill.today { background:#2B2B2B; border-color:#2B2B2B; }
+  .pill.today .w,.pill.today .n { color:#fff; }
+  .pill.wknd { background:#F6F1E7; }
+  .dot { width:6px; height:6px; border-radius:50%; display:inline-block; }
+  .ag { padding:6px 14px 8px; display:flex; flex-direction:column; gap:7px; }
+  .dayhead { display:flex; align-items:baseline; gap:8px; font-size:14.5px; font-weight:800; margin-top:10px; scroll-margin-top:86px; }
+  .dayhead.today-h { color:#E05A4E; }
+  .dayhead small { font-size:12px; color:#9a938a; font-weight:600; }
+  .collapse-row { text-align:center; font-size:12.5px; color:#9a938a; background:#F3EFE8; border-radius:10px; padding:8px; font-weight:600; margin-top:6px; }
+  .pinbox { margin:10px 0 2px; background:#FFF6F5; border:1.5px solid #E05A4E; border-radius:14px; padding:10px 12px; }
+  .pinbox .pt { font-size:13px; font-weight:800; color:#C4452F; margin-bottom:6px; }
+
+  /* ===== bottom bar ===== */
+  .bottombar { position:fixed; left:0; right:0; bottom:0; background:rgba(250,248,245,.96); backdrop-filter:blur(10px); border-top:1px solid #e2ddd4; display:flex; align-items:flex-end; justify-content:space-around; padding:8px 10px calc(10px + env(safe-area-inset-bottom)); z-index:20; }
+  .tabbtn { display:flex; flex-direction:column; align-items:center; gap:2px; font-size:11.5px; font-weight:700; color:#9a938a; width:84px; padding:6px 0; }
+  .tabbtn .ic { font-size:22px; }
+  .tabbtn.active { color:#2B2B2B; }
+  .micwrap { display:flex; flex-direction:column; align-items:center; margin-top:-34px; }
+  .micbtn { width:74px; height:74px; border-radius:50%; background:#E05A4E; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 18px rgba(224,90,78,.42); font-size:32px; transition:transform .15s; }
+  .micbtn:active { transform:scale(.93); }
+  .micbtn.listening { background:#C4452F; animation:pulse 1.2s infinite; }
+  @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(224,90,78,.5);} 70%{box-shadow:0 0 0 18px rgba(224,90,78,0);} 100%{box-shadow:0 0 0 0 rgba(224,90,78,0);} }
+  .michint { font-size:11px; color:#9a938a; font-weight:600; margin-top:4px; }
+  .kbbtn { position:fixed; right:16px; bottom:calc(104px + env(safe-area-inset-bottom)); width:46px; height:46px; border-radius:50%; background:#fff; border:1px solid #e2ddd4; box-shadow:0 3px 10px rgba(0,0,0,.1); font-size:20px; z-index:19; }
+
+  /* ===== overlays ===== */
+  .overlay { position:fixed; inset:0; background:rgba(40,35,28,.45); z-index:50; display:none; align-items:flex-end; }
+  .overlay.show { display:flex; }
+  .sheet { background:#FAF8F5; width:100%; border-radius:22px 22px 0 0; padding:18px 18px calc(20px + env(safe-area-inset-bottom)); max-height:88vh; overflow-y:auto; }
+  .sheet h2 { font-size:18px; font-weight:800; margin-bottom:12px; }
+  .heardbox { background:#F3EFE8; border-radius:12px; padding:11px 13px; font-size:14px; color:#6b6b6b; line-height:1.6; margin-bottom:12px; }
+  .field { margin-bottom:12px; }
+  .field label { display:block; font-size:12.5px; font-weight:700; color:#9a938a; margin-bottom:5px; }
+  .field input[type=text], .field input[type=date], .field input[type=time], .field textarea {
+    width:100%; font-size:16px; padding:11px 12px; border-radius:12px; border:1px solid #ddd6ca; background:#fff; font-family:inherit; color:#2B2B2B; -webkit-appearance:none;
+  }
+  .field textarea { resize:none; line-height:1.5; }
+  .catrow { display:flex; gap:7px; flex-wrap:wrap; }
+  .catopt { font-size:14px; padding:9px 13px; border-radius:12px; background:#fff; border:1.5px solid #ddd6ca; font-weight:700; color:#5a5a5a; }
+  .catopt.sel { border-color:#2B2B2B; background:#2B2B2B; color:#fff; }
+  .togglerow { display:flex; align-items:center; justify-content:space-between; background:#fff; border:1px solid #ddd6ca; border-radius:12px; padding:11px 13px; }
+  .togglerow .tl { font-size:15px; font-weight:700; }
+  .togglerow .tl small { display:block; font-size:11.5px; color:#9a938a; font-weight:600; margin-top:2px; }
+  .switch { width:50px; height:30px; border-radius:15px; background:#d8d2c6; position:relative; transition:background .2s; flex-shrink:0; }
+  .switch.on { background:#3E9C6C; }
+  .switch::after { content:""; position:absolute; top:3px; left:3px; width:24px; height:24px; border-radius:50%; background:#fff; transition:left .2s; box-shadow:0 1px 3px rgba(0,0,0,.2); }
+  .switch.on::after { left:23px; }
+  .btnrow { display:flex; gap:10px; margin-top:16px; }
+  .btn { flex:1; padding:14px; border-radius:14px; text-align:center; font-size:16px; font-weight:700; }
+  .btn.primary { background:#2B2B2B; color:#fff; }
+  .btn.ghost { background:#fff; border:1.5px solid #ddd6ca; color:#5a5a5a; }
+  .btn.danger { background:#FDEBE9; color:#C4452F; }
+
+  /* reminder banner */
+  .remind-banner { position:fixed; top:calc(10px + env(safe-area-inset-top)); left:12px; right:12px; background:#2B2B2B; color:#fff; border-radius:18px; padding:14px 15px; display:none; gap:11px; align-items:flex-start; box-shadow:0 10px 26px rgba(0,0,0,.32); z-index:60; }
+  .remind-banner.show { display:flex; }
+  .remind-banner .bell { font-size:22px; }
+  .remind-banner .t1 { font-weight:800; font-size:15px; margin-bottom:3px; }
+  .remind-banner .t2 { font-size:13px; color:#cfc8bc; line-height:1.65; }
+  .remind-banner .actions { display:flex; gap:8px; margin-top:10px; }
+  .remind-banner .ract { font-size:13px; font-weight:700; padding:8px 14px; border-radius:10px; background:#4a4a4a; color:#fff; }
+  .remind-banner .ract.go { background:#E05A4E; }
+
+  /* live transcript */
+  .livebox { position:fixed; left:16px; right:16px; bottom:calc(120px + env(safe-area-inset-bottom)); background:#2B2B2B; color:#fff; border-radius:16px; padding:14px 16px; font-size:16px; line-height:1.6; display:none; z-index:30; box-shadow:0 8px 22px rgba(0,0,0,.3); }
+  .livebox.show { display:block; }
+  .livebox .lb-hint { font-size:12px; color:#cfc8bc; margin-bottom:5px; font-weight:700; }
+
+  .toast { position:fixed; bottom:calc(118px + env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%); background:#2B2B2B; color:#fff; font-size:14px; font-weight:600; padding:10px 18px; border-radius:20px; z-index:70; display:none; white-space:nowrap; box-shadow:0 6px 16px rgba(0,0,0,.25); }
+
+  .page { display:none; } .page.show { display:block; }
+</style>
+</head>
+<body>
+
+<!-- ===================== 今日頁 ===================== -->
+<div class="page show" id="page-today">
+  <div class="app-header">
+    <div class="date" id="today-date"></div>
+    <h1 id="today-title">今天要做的事 ☀️</h1>
+  </div>
+  <div class="chips" id="cat-chips"></div>
+  <div class="tasks" id="today-list"></div>
+</div>
+
+<!-- ===================== 行事曆頁 ===================== -->
+<div class="page" id="page-cal">
+  <div class="app-header">
+    <div class="date" id="cal-range"></div>
+    <h1>未來兩週 📅</h1>
+  </div>
+  <div class="strip" id="cal-strip"></div>
+  <div class="ag" id="cal-agenda"></div>
+</div>
+
+<!-- ===================== 底部列 ===================== -->
+<button class="kbbtn" id="kb-btn" title="打字輸入">⌨️</button>
+<div class="bottombar">
+  <button class="tabbtn active" id="tab-today"><span class="ic">☀️</span>今天</button>
+  <div class="micwrap">
+    <button class="micbtn" id="mic-btn">🎙️</button>
+    <div class="michint" id="mic-hint">點一下說話</div>
+  </div>
+  <button class="tabbtn" id="tab-cal"><span class="ic">📅</span>未來14天</button>
+</div>
+
+<!-- ===================== 語音即時字幕 ===================== -->
+<div class="livebox" id="livebox">
+  <div class="lb-hint">正在聽… 說完請再點一下麥克風</div>
+  <div id="live-text">…</div>
+</div>
+
+<!-- ===================== 確認視窗 ===================== -->
+<div class="overlay" id="confirm-overlay">
+  <div class="sheet">
+    <h2>聽到了 👂 請確認</h2>
+    <div class="heardbox" id="heard-text"></div>
+    <div class="field"><label>事項內容</label><textarea id="f-title" rows="2"></textarea></div>
+    <div class="field" id="f-items-wrap" style="display:none;">
+      <label>採買品項（用「、」分隔，會變成可打勾清單）</label>
+      <input type="text" id="f-items">
+    </div>
+    <div class="field"><label>分類</label><div class="catrow" id="f-cats"></div></div>
+    <div class="field" style="display:flex; gap:10px;">
+      <div style="flex:1;"><label>日期</label><input type="date" id="f-date"></div>
+      <div style="flex:1;"><label>時間（可留白）</label><input type="time" id="f-time"></div>
+    </div>
+    <div class="field">
+      <div class="togglerow">
+        <div class="tl">🔔 持續提醒<small>完成打勾前，每次打開 App 都會提醒</small></div>
+        <div class="switch" id="f-remind"></div>
+      </div>
+    </div>
+    <div class="btnrow">
+      <button class="btn ghost" id="f-cancel">取消</button>
+      <button class="btn primary" id="f-save">✓ 加入待辦</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== 打字輸入 ===================== -->
+<div class="overlay" id="text-overlay">
+  <div class="sheet">
+    <h2>⌨️ 打字新增</h2>
+    <div class="heardbox">直接輸入一句話，例如「明天要記得買雞蛋牛奶」。<br>小提示：也可以按 iPhone 鍵盤上的 🎙️ 用聽寫輸入。</div>
+    <div class="field"><textarea id="t-input" rows="3" placeholder="今天要記得…"></textarea></div>
+    <div class="btnrow">
+      <button class="btn ghost" id="t-cancel">取消</button>
+      <button class="btn primary" id="t-ok">辨識內容 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== 任務操作 ===================== -->
+<div class="overlay" id="action-overlay">
+  <div class="sheet">
+    <h2 id="a-title" style="font-size:16px;"></h2>
+    <div class="btnrow" style="flex-direction:column; margin-top:6px;">
+      <button class="btn ghost" id="a-tomorrow">📆 延到明天</button>
+      <button class="btn ghost" id="a-remind">🔔 開啟／關閉提醒</button>
+      <button class="btn danger" id="a-delete">🗑️ 刪除這項待辦</button>
+      <button class="btn ghost" id="a-cancel">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== 提醒橫幅 ===================== -->
+<div class="remind-banner" id="banner">
+  <div class="bell">🔔</div>
+  <div style="flex:1;">
+    <div class="t1" id="bn-title"></div>
+    <div class="t2" id="bn-body"></div>
+    <div class="actions">
+      <button class="ract go" id="bn-go">去查看</button>
+      <button class="ract" id="bn-snooze">1 小時後再提醒</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+/* ================= 基本工具 ================= */
+const $ = id => document.getElementById(id);
+const pad = n => String(n).padStart(2,"0");
+const iso = d => d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const todayIso = () => iso(new Date());
+const addDays = (d,n) => { const x=new Date(d); x.setDate(x.getDate()+n); return x; };
+const WEEK = ["日","一","二","三","四","五","六"];
+function fmtMD(s){ const [y,m,d]=s.split("-").map(Number); return m+"/"+d; }
+function dayLabel(s){
+  const t=todayIso(), tm=iso(addDays(new Date(),1));
+  if(s===t) return "今天"; if(s===tm) return "明天";
+  const [y,m,d]=s.split("-").map(Number);
+  return "週"+WEEK[new Date(y,m-1,d).getDay()];
+}
+function toast(msg){ const t=$("toast"); t.textContent=msg; t.style.display="block"; clearTimeout(t._h); t._h=setTimeout(()=>t.style.display="none",2200); }
+
+/* ================= 分類定義 ================= */
+const CATS = [
+  {key:"buy",  name:"🛒 家庭採買", color:"#3E9C6C", bg:"#EAF3EC", fg:"#2F7A4F"},
+  {key:"sch",  name:"🎒 壯壯上學", color:"#3A62A8", bg:"#EAF0FA", fg:"#3A62A8"},
+  {key:"baby", name:"👶 大福照顧", color:"#E08A2E", bg:"#FBF0E6", fg:"#B06A2A"},
+  {key:"oth",  name:"📌 其他",     color:"#8a7fb5", bg:"#EFEAF7", fg:"#6a5c9e"}
+];
+const catOf = k => CATS.find(c=>c.key===k)||CATS[3];
+
+/* ================= 儲存 ================= */
+let memStore={};
+const store = {
+  get(){ try{ return JSON.parse(localStorage.getItem("memoTasks")||"[]"); }catch(e){ return memStore.tasks||[]; } },
+  set(v){ try{ localStorage.setItem("memoTasks",JSON.stringify(v)); }catch(e){ memStore.tasks=v; } }
+};
+let tasks = store.get();
+const save = () => store.set(tasks);
+
+/* ================= 關鍵字解析 ================= */
+const GROCERY = ("中筋麵粉,高筋麵粉,低筋麵粉,廚房紙巾,鮮奶油,義大利麵,金針菇,杏鮑菇,雞胸肉,豬絞肉,五花肉,虱目魚,吳郭魚,小黃瓜,馬鈴薯,紅蘿蔔,白蘿蔔,高麗菜,青江菜,地瓜葉,空心菜,太白粉,番茄醬,沙茶醬,咖哩塊,衛生紙,濕紙巾,洗衣精,洗碗精,沐浴乳,洗髮精,保鮮膜,鋁箔紙,垃圾袋,洗手乳,漂白水,棉花棒,奇異果,麵粉,雞蛋,洋蔥,牛奶,鮮奶,吐司,麵包,白米,糙米,青蔥,大蒜,菠菜,番茄,茄子,青椒,甜椒,玉米,香菇,豆腐,豆干,雞肉,雞腿,豬肉,排骨,牛肉,鮭魚,蝦子,蛤蜊,透抽,醬油,砂糖,冰糖,米酒,香油,沙拉油,橄欖油,胡椒,味噌,泡麵,冬粉,米粉,麵條,水餃,饅頭,蘋果,香蕉,芭樂,橘子,柳丁,葡萄,西瓜,鳳梨,酪梨,檸檬,優格,起司,奶油,豆漿,果汁,咖啡,茶包,尿布,奶粉,電池,燈泡,肥皂,酒精,口罩,紙巾,雞,魚,蝦,蔥,薑,蒜,米,鹽,糖,醋,油,蛋")
+  .split(",").sort((a,b)=>b.length-a.length);
+const SCH_KW = ["壯壯","上學","學校","老師","聯絡簿","班親會","校外教學","接送","放學","功課","作業","便當","水壺","繳費","幼兒園","幼稚園","才藝","家長會","運動會"];
+const BABY_KW = ["大福","疫苗","餵藥","吃藥","副食品","洗澡","看醫生","預防針","健兒門診","收涎","保母"];
+const NUMMAP = {"零":0,"一":1,"二":2,"兩":2,"三":3,"四":4,"五":5,"六":6,"七":7,"八":8,"九":9};
+function zhNum(s){
+  if(/^\d+$/.test(s)) return +s;
+  if(s==="十") return 10;
+  const m=s.match(/^([一二三]?)十([一二三四五六七八九]?)$/);
+  if(m) return (m[1]?NUMMAP[m[1]]:1)*10 + (m[2]?NUMMAP[m[2]]:0);
+  return NUMMAP[s]!==undefined?NUMMAP[s]:null;
+}
+function segment(str){
+  const chunks = str.replace(/[、,，和跟及與\s還有]+/g,"|").split("|").filter(Boolean);
+  const out=[];
+  for(const c of chunks){
+    let i=0, buf="";
+    while(i<c.length){
+      let hit=null;
+      for(const g of GROCERY){ if(c.startsWith(g,i)){ hit=g; break; } }
+      if(hit){ if(buf){out.push(buf);buf="";} out.push(hit); i+=hit.length; }
+      else { buf+=c[i]; i++; }
+    }
+    if(buf) out.push(buf);
+  }
+  return out.filter(x=>x && !/^[的了呢喔哦啊嗎]+$/.test(x));
+}
+function parseInput(raw){
+  let s = raw.replace(/[。！!？?～~]/g,"").trim();
+  const heard = raw.trim();
+  /* --- 提醒 --- */
+  const remind = /(要記得|記得|別忘|提醒)/.test(s);
+  /* --- 日期 --- */
+  let due=null, dated=true;
+  const now=new Date();
+  const rel=[["大後天",3],["後天",2],["明天",1],["明日",1],["今天",0],["今日",0]];
+  for(const [w,n] of rel){ if(s.includes(w)){ due=iso(addDays(now,n)); s=s.replace(w,""); break; } }
+  if(!due){
+    const m=s.match(/(下)?(週|星期|禮拜)([一二三四五六日天])/);
+    if(m){
+      const map={"一":1,"二":2,"三":3,"四":4,"五":5,"六":6,"日":0,"天":0};
+      let diff;
+      if(m[1]){ /* 下週X＝下個日曆週的那一天（週一為一週之始） */
+        const toNextMon=((8-now.getDay())%7)||7;
+        const offset=map[m[3]]===0?6:map[m[3]]-1;
+        diff=toNextMon+offset;
+      }else{
+        diff=(map[m[3]]-now.getDay()+7)%7; /* 0＝就是今天 */
+      }
+      due=iso(addDays(now,diff)); s=s.replace(m[0],"");
+    }
+  }
+  if(!due){
+    const m=s.match(/([0-9]{1,2}|[一二三四五六七八九十]{1,3})月([0-9]{1,2}|[一二三四五六七八九十]{1,3})(日|號)/);
+    if(m){
+      const mo=zhNum(m[1]), da=zhNum(m[2]);
+      if(mo&&da){ let d=new Date(now.getFullYear(),mo-1,da); if(iso(d)<todayIso()) d.setFullYear(d.getFullYear()+1); due=iso(d); s=s.replace(m[0],""); }
+    }
+  }
+  if(!due){ due=todayIso(); dated=false; }
+  /* --- 時間 --- */
+  let time=null;
+  let tm=s.match(/([0-2]?[0-9])[:：]([0-5][0-9])/);
+  if(tm){ time=pad(+tm[1])+":"+tm[2]; s=s.replace(tm[0],""); }
+  else{
+    tm=s.match(/(上午|早上|中午|下午|晚上)?([0-9]{1,2}|[一二兩三四五六七八九十]{1,2})點(半|[0-9]{1,2}分|[一二三四五六七八九十]{1,3}分)?/);
+    if(tm && (tm[1]||/點/.test(tm[0]))){
+      let h=zhNum(tm[2]);
+      if(h!==null){
+        let mi=0;
+        if(tm[3]==="半") mi=30;
+        else if(tm[3]) { const v=zhNum(tm[3].replace("分","")); if(v!==null) mi=v; }
+        if((tm[1]==="下午"||tm[1]==="晚上") && h<12) h+=12;
+        if(tm[1]==="中午" && h<11) h+=12;
+        if(h<24){ time=pad(h)+":"+pad(mi); s=s.replace(tm[0],""); }
+      }
+    }
+  }
+  /* --- 去除贅詞 --- */
+  s=s.replace(/要記得|記得|別忘了|別忘|提醒我|提醒|幫我|我要|然後|再來|另外/g,"").trim();
+  /* --- 分類 --- */
+  let cat="oth", items=[];
+  const hasBuy=/購買|採買|買/.test(s);
+  if(/壯壯/.test(s)) cat="sch";
+  else if(/大福/.test(s)) cat="baby";
+  else if(hasBuy) cat="buy";
+  else if(SCH_KW.some(k=>s.includes(k))) cat="sch";
+  else if(BABY_KW.some(k=>s.includes(k))) cat="baby";
+  else if(GROCERY.some(k=>k.length>1&&s.includes(k))) cat="buy";
+  /* --- 採買品項 --- */
+  let title=s.replace(/^[，,、\s]+|[，,、\s]+$/g,"");
+  if(cat==="buy" && hasBuy){
+    const m=s.match(/(?:購買|採買|買)([^]*)$/);
+    if(m && m[1].trim()){
+      items=segment(m[1].trim());
+      if(items.length) title="購買"+items.join("、");
+    }
+  }
+  if(!title) title=heard;
+  return { heard, title, cat, due, time, remind, items, dated };
+}
+
+/* ================= 新增流程（確認視窗） ================= */
+let pending=null, selCat="oth";
+function openConfirm(p){
+  pending=p; selCat=p.cat;
+  $("heard-text").innerHTML="🎙️ 「"+escapeHtml(p.heard)+"」"+(p.dated?"":"<br><small style='color:#b06a2a'>沒聽到日期，先排在今天，可自行修改</small>");
+  $("f-title").value=p.title;
+  $("f-date").value=p.due;
+  $("f-time").value=p.time||"";
+  $("f-remind").classList.toggle("on",p.remind);
+  const cr=$("f-cats"); cr.innerHTML="";
+  CATS.forEach(c=>{
+    const b=document.createElement("button");
+    b.className="catopt"+(c.key===selCat?" sel":""); b.textContent=c.name;
+    b.onclick=()=>{ selCat=c.key; [...cr.children].forEach(x=>x.classList.remove("sel")); b.classList.add("sel"); syncItemsField(); };
+    cr.appendChild(b);
+  });
+  syncItemsField();
+  $("confirm-overlay").classList.add("show");
+}
+function syncItemsField(){
+  const w=$("f-items-wrap");
+  if(selCat==="buy"){ w.style.display="block"; $("f-items").value=(pending.items||[]).join("、"); }
+  else w.style.display="none";
+}
+function escapeHtml(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+$("f-cancel").onclick=()=>$("confirm-overlay").classList.remove("show");
+$("f-remind").onclick=()=>$("f-remind").classList.toggle("on");
+$("f-save").onclick=()=>{
+  const title=$("f-title").value.trim();
+  if(!title){ toast("請輸入事項內容"); return; }
+  let items=[];
+  if(selCat==="buy"){
+    items=$("f-items").value.split(/[、,，\s]+/).filter(Boolean).map(n=>({name:n,done:false}));
+  }
+  tasks.push({
+    id:Date.now()+""+Math.floor(Math.random()*999),
+    title, cat:selCat, items,
+    due:$("f-date").value||todayIso(),
+    time:$("f-time").value||null,
+    remind:$("f-remind").classList.contains("on"),
+    done:false, createdAt:new Date().toISOString(), snooze:0
+  });
+  save(); renderAll();
+  $("confirm-overlay").classList.remove("show");
+  toast("✓ 已加入待辦");
+};
+
+/* ================= 語音辨識 ================= */
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+let rec=null, listening=false, finalText="";
+$("mic-btn").onclick=()=>{
+  if(listening){ stopRec(); return; }
+  if(!SR){ toast("此瀏覽器不支援語音，改用打字＋聽寫"); openTextInput(); return; }
+  try{
+    rec=new SR(); rec.lang="zh-TW"; rec.interimResults=true; rec.continuous=false;
+    finalText="";
+    rec.onresult=e=>{
+      let interim="";
+      for(let i=e.resultIndex;i<e.results.length;i++){
+        if(e.results[i].isFinal) finalText+=e.results[i][0].transcript;
+        else interim+=e.results[i][0].transcript;
+      }
+      $("live-text").textContent=(finalText+interim)||"…";
+    };
+    rec.onerror=ev=>{
+      stopUI();
+      if(ev.error==="not-allowed"||ev.error==="service-not-allowed"){ toast("麥克風未授權，改用打字＋聽寫"); openTextInput(); }
+      else if(ev.error!=="aborted"){ toast("沒聽清楚，請再試一次或改用打字"); }
+    };
+    rec.onend=()=>{
+      stopUI();
+      const t=finalText.trim();
+      if(t) openConfirm(parseInput(t));
+    };
+    rec.start();
+    listening=true;
+    $("mic-btn").classList.add("listening");
+    $("mic-hint").textContent="說完再點一下";
+    $("livebox").classList.add("show"); $("live-text").textContent="…";
+  }catch(e){ toast("語音啟動失敗，改用打字輸入"); openTextInput(); }
+};
+function stopRec(){ try{ rec&&rec.stop(); }catch(e){} }
+function stopUI(){ listening=false; $("mic-btn").classList.remove("listening"); $("mic-hint").textContent="點一下說話"; $("livebox").classList.remove("show"); }
+
+/* ================= 打字輸入 ================= */
+function openTextInput(){ $("t-input").value=""; $("text-overlay").classList.add("show"); setTimeout(()=>$("t-input").focus(),150); }
+$("kb-btn").onclick=openTextInput;
+$("t-cancel").onclick=()=>$("text-overlay").classList.remove("show");
+$("t-ok").onclick=()=>{
+  const v=$("t-input").value.trim();
+  if(!v){ toast("請先輸入內容"); return; }
+  $("text-overlay").classList.remove("show");
+  openConfirm(parseInput(v));
+};
+
+/* ================= 任務操作 ================= */
+let actTask=null;
+function openAction(t){
+  actTask=t;
+  $("a-title").textContent="「"+t.title+"」";
+  $("a-remind").textContent = t.remind?"🔕 關閉提醒":"🔔 開啟提醒";
+  $("action-overlay").classList.add("show");
+}
+$("a-cancel").onclick=()=>$("action-overlay").classList.remove("show");
+$("a-tomorrow").onclick=()=>{ if(actTask){ actTask.due=iso(addDays(new Date(),1)); save(); renderAll(); toast("已延到明天"); } $("action-overlay").classList.remove("show"); };
+$("a-remind").onclick=()=>{ if(actTask){ actTask.remind=!actTask.remind; save(); renderAll(); toast(actTask.remind?"已開啟提醒":"已關閉提醒"); } $("action-overlay").classList.remove("show"); };
+$("a-delete").onclick=()=>{ if(actTask){ tasks=tasks.filter(x=>x.id!==actTask.id); save(); renderAll(); toast("已刪除"); } $("action-overlay").classList.remove("show"); };
+function toggleDone(t){
+  t.done=!t.done;
+  t.completedAt=t.done?new Date().toISOString():null;
+  if(t.done && t.items) t.items.forEach(i=>i.done=true);
+  save(); renderAll();
+  if(t.done) toast("🎉 完成一項！");
+}
+function toggleItem(t,idx){
+  t.items[idx].done=!t.items[idx].done;
+  if(t.items.length && t.items.every(i=>i.done) && !t.done){ t.done=true; t.completedAt=new Date().toISOString(); toast("🎉 全部買齊，自動完成！"); }
+  save(); renderAll();
+}
+
+/* ================= 卡片繪製 ================= */
+function badgeDue(t){
+  const td=todayIso();
+  let s = t.due===td ? "今日" : t.due===iso(addDays(new Date(),1)) ? "明天" : fmtMD(t.due)+" "+dayLabel(t.due);
+  if(t.time) s+=" "+t.time;
+  return s;
+}
+function cardHtml(t,opt){
+  opt=opt||{};
+  const c=catOf(t.cat);
+  const od = !t.done && t.due<todayIso();
+  const cls = "card"+(od&&!opt.noRed?" overdue":"")+(t.done?" donecard":"");
+  let h=`<div class="${cls}" data-id="${t.id}">
+    <div class="card-top">
+      <button class="checkbox ${t.done?"done":""}" data-act="done"></button>
+      <div class="card-title ${t.done?"done":""}">${escapeHtml(t.title)}</div>
+      <button class="more-btn" data-act="more">⋯</button>
+    </div>
+    <div class="badges">
+      <span class="badge" style="background:${c.bg};color:${c.fg};">${c.name}</span>
+      <span class="badge b-time">${badgeDue(t)}</span>
+      ${t.remind&&!t.done?'<span class="badge b-alert">🔔 提醒</span>':""}
+    </div>`;
+  if(t.items && t.items.length && !t.done){
+    h+='<div class="shoplist">'+t.items.map((it,i)=>
+      `<div class="shopitem" data-idx="${i}" data-act="item"><span class="sq ${it.done?"done":""}"></span><span class="txt ${it.done?"done":""}">${escapeHtml(it.name)}</span></div>`
+    ).join("")+"</div>";
+  }
+  if(od && !t.done){
+    const days=Math.round((new Date(todayIso())-new Date(t.due))/86400000);
+    h+=`<div class="overdue-tag">⚠️ 已逾期 ${days} 天${t.remind?"，完成前會一直提醒":""}</div>`;
+  }
+  return h+"</div>";
+}
+function bindCards(container){
+  container.querySelectorAll(".card").forEach(el=>{
+    const t=tasks.find(x=>x.id===el.dataset.id);
+    if(!t) return;
+    el.querySelector('[data-act="done"]').onclick=()=>toggleDone(t);
+    el.querySelector('[data-act="more"]').onclick=()=>openAction(t);
+    el.querySelectorAll('[data-act="item"]').forEach(n=>{ n.onclick=()=>toggleItem(t,+n.dataset.idx); });
+  });
+}
+
+/* ================= 今日頁 ================= */
+let filterCat="all";
+function renderChips(){
+  const wrap=$("cat-chips"); wrap.innerHTML="";
+  const all=[{key:"all",name:"全部"},...CATS];
+  all.forEach(c=>{
+    const b=document.createElement("button");
+    b.className="chip"+(filterCat===c.key?" active":""); b.textContent=c.name;
+    b.onclick=()=>{ filterCat=c.key; renderToday(); };
+    wrap.appendChild(b);
+  });
+}
+function renderToday(){
+  renderChips();
+  const td=todayIso();
+  const list=$("today-list");
+  const vis=t=>filterCat==="all"||t.cat===filterCat;
+  const overdue=tasks.filter(t=>!t.done&&t.due<td&&vis(t)).sort((a,b)=>a.due<b.due?-1:1);
+  const today=tasks.filter(t=>!t.done&&t.due===td&&vis(t)).sort((a,b)=>(a.time||"99")<(b.time||"99")?-1:1);
+  const doneToday=tasks.filter(t=>t.done&&(t.due===td||(t.completedAt||"").slice(0,10)===td)&&vis(t));
+  let h="";
+  if(overdue.length){ h+='<div class="group-label red">⚠️ 逾期未完成</div>'+overdue.map(t=>cardHtml(t)).join(""); }
+  if(today.length){ h+=(overdue.length?'<div class="group-label">今天</div>':"")+today.map(t=>cardHtml(t)).join(""); }
+  if(doneToday.length){ h+='<div class="group-label">已完成 ✓</div>'+doneToday.map(t=>cardHtml(t)).join(""); }
+  if(!h) h='<div class="empty-state">今天還沒有待辦事項 🌿<br>點下方麥克風說一句話試試<br>例如「今天要記得買洋蔥雞蛋中筋麵粉」</div>';
+  list.innerHTML=h; bindCards(list);
+  const n=overdue.length+today.length;
+  $("today-title").textContent = n? `今天要做的事 ☀️（${n}）` : "今天要做的事 ☀️";
+}
+
+/* ================= 行事曆頁 ================= */
+function renderCal(){
+  const now=new Date(), td=todayIso();
+  const days=[]; for(let i=0;i<14;i++) days.push(iso(addDays(now,i)));
+  $("cal-range").textContent=fmtMD(days[0])+" – "+fmtMD(days[13]);
+  /* strip */
+  const strip=$("cal-strip"); strip.innerHTML="";
+  days.forEach(ds=>{
+    const dt=new Date(ds+"T00:00:00"), wd=dt.getDay();
+    const cats=[...new Set(tasks.filter(t=>t.due===ds&&!t.done).map(t=>t.cat))];
+    const p=document.createElement("button");
+    p.className="pill"+(ds===td?" today":(wd===0||wd===6)?" wknd":"");
+    p.innerHTML=`<div class="w">${ds===td?"今天":WEEK[wd]}</div><div class="n">${dt.getDate()}</div>
+      <div class="dots">${cats.slice(0,4).map(c=>`<span class="dot" style="background:${catOf(c).color}"></span>`).join("")}</div>`;
+    p.onclick=()=>{ const a=document.getElementById("day-"+ds); if(a) a.scrollIntoView({behavior:"smooth",block:"start"}); };
+    strip.appendChild(p);
+  });
+  /* agenda */
+  const ag=$("cal-agenda"); let h="";
+  const overdue=tasks.filter(t=>!t.done&&t.due<td).sort((a,b)=>a.due<b.due?-1:1);
+  if(overdue.length){
+    h+=`<div class="pinbox"><div class="pt">⚠️ 逾期未完成（會一直顯示在最上方）</div>${overdue.map(t=>cardHtml(t,{noRed:true})).join("")}</div>`;
+  }
+  let emptyRun=[];
+  const flushEmpty=()=>{
+    if(!emptyRun.length) return;
+    const lab = emptyRun.length===1
+      ? `${fmtMD(emptyRun[0])}（${dayLabel(emptyRun[0])}）沒有安排`
+      : `${fmtMD(emptyRun[0])} – ${fmtMD(emptyRun[emptyRun.length-1])} 沒有安排`;
+    h+=`<div class="collapse-row" id="day-${emptyRun[0]}">${lab}</div>`;
+    emptyRun.forEach((d,i)=>{ if(i>0) h+=`<span id="day-${d}"></span>`; });
+    emptyRun=[];
+  };
+  days.forEach(ds=>{
+    const items=tasks.filter(t=>t.due===ds).sort((a,b)=>(a.done?1:0)-(b.done?1:0)||((a.time||"99")<(b.time||"99")?-1:1));
+    if(!items.length && ds!==td){ emptyRun.push(ds); return; }
+    flushEmpty();
+    const wd=new Date(ds+"T00:00:00").getDay();
+    h+=`<div class="dayhead ${ds===td?"today-h":""}" id="day-${ds}">${dayLabel(ds)} <small>${fmtMD(ds)} 週${WEEK[wd]}</small></div>`;
+    h+= items.length? items.map(t=>cardHtml(t)).join("") : '<div class="collapse-row">今天沒有安排 🌿</div>';
+  });
+  flushEmpty();
+  ag.innerHTML=h; bindCards(ag);
+}
+
+/* ================= 分頁切換 ================= */
+function showPage(p){
+  $("page-today").classList.toggle("show",p==="today");
+  $("page-cal").classList.toggle("show",p==="cal");
+  $("tab-today").classList.toggle("active",p==="today");
+  $("tab-cal").classList.toggle("active",p==="cal");
+  window.scrollTo(0,0);
+}
+$("tab-today").onclick=()=>showPage("today");
+$("tab-cal").onclick=()=>{ renderCal(); showPage("cal"); };
+
+/* ================= 提醒 ================= */
+let lastBannerKey="";
+function dueForRemind(t){
+  if(t.done||!t.remind) return false;
+  if(t.snooze && Date.now()<t.snooze) return false;
+  const td=todayIso();
+  if(t.due<td) return true;
+  if(t.due===td){
+    if(!t.time) return true;
+    const now=new Date();
+    return t.time <= pad(now.getHours())+":"+pad(now.getMinutes());
+  }
+  return false;
+}
+function checkReminders(force){
+  const list=tasks.filter(dueForRemind);
+  if(!list.length){ $("banner").classList.remove("show"); return; }
+  const key=list.map(t=>t.id).join(",");
+  if(!force && key===lastBannerKey && $("banner").classList.contains("show")) return;
+  lastBannerKey=key;
+  $("bn-title").textContent=`有 ${list.length} 件事還沒完成！`;
+  $("bn-body").innerHTML=list.slice(0,4).map(t=>"・"+escapeHtml(t.title)+"（"+badgeDue(t)+"）").join("<br>")+(list.length>4?"<br>…等":"");
+  $("banner").classList.add("show");
+  beep();
+}
+$("bn-go").onclick=()=>{ $("banner").classList.remove("show"); showPage("today"); renderToday(); };
+$("bn-snooze").onclick=()=>{
+  tasks.filter(dueForRemind).forEach(t=>t.snooze=Date.now()+3600000);
+  save(); $("banner").classList.remove("show"); toast("1 小時後再提醒");
+};
+function beep(){
+  try{
+    const ctx=new (window.AudioContext||window.webkitAudioContext)();
+    [0,0.18].forEach((d,i)=>{
+      const o=ctx.createOscillator(), g=ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.frequency.value=i?1046:784; o.type="sine";
+      g.gain.setValueAtTime(0.001,ctx.currentTime+d);
+      g.gain.exponentialRampToValueAtTime(0.25,ctx.currentTime+d+0.02);
+      g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+d+0.15);
+      o.start(ctx.currentTime+d); o.stop(ctx.currentTime+d+0.16);
+    });
+  }catch(e){}
+  if(navigator.vibrate) navigator.vibrate([120,60,120]);
+}
+
+/* ================= 啟動 ================= */
+function renderAll(){ renderToday(); if($("page-cal").classList.contains("show")) renderCal(); checkReminders(); }
+(function init(){
+  const n=new Date();
+  $("today-date").textContent=`${n.getMonth()+1}月${n.getDate()}日 星期${WEEK[n.getDay()]}`;
+  renderAll();
+  setTimeout(()=>checkReminders(true),800);
+  setInterval(()=>checkReminders(false),30000);
+  document.addEventListener("visibilitychange",()=>{ if(!document.hidden){ renderAll(); checkReminders(true); } });
+})();
+</script>
+</body>
+</html>
