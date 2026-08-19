@@ -178,7 +178,7 @@
 <!-- ===================== 確認視窗 ===================== -->
 <div class="overlay" id="confirm-overlay">
   <div class="sheet">
-    <h2>聽到了 👂 請確認</h2>
+    <h2 id="c-head">聽到了 👂 請確認</h2>
     <div class="heardbox" id="heard-text"></div>
     <div class="field"><label>事項內容</label><textarea id="f-title" rows="2"></textarea></div>
     <div class="field" id="f-items-wrap" style="display:none;">
@@ -221,6 +221,7 @@
   <div class="sheet">
     <h2 id="a-title" style="font-size:16px;"></h2>
     <div class="btnrow" style="flex-direction:column; margin-top:6px;">
+      <button class="btn ghost" id="a-edit">✏️ 修改內容與時間</button>
       <button class="btn ghost" id="a-tomorrow">📆 延到明天</button>
       <button class="btn ghost" id="a-remind">🔔 開啟／關閉提醒</button>
       <button class="btn danger" id="a-delete">🗑️ 刪除這項待辦</button>
@@ -384,10 +385,13 @@ function parseInput(raw){
 }
 
 /* ================= 新增流程（確認視窗） ================= */
-let pending=null, selCat="oth";
-function openConfirm(p){
-  pending=p; selCat=p.cat;
-  $("heard-text").innerHTML="🎙️ 「"+escapeHtml(p.heard)+"」"+(p.dated?"":"<br><small style='color:#b06a2a'>沒聽到日期，先排在今天，可自行修改</small>");
+let pending=null, selCat="oth", editingTask=null;
+function openConfirm(p, edit){
+  pending=p; selCat=p.cat; editingTask=edit||null;
+  $("c-head").textContent = edit ? "✏️ 修改待辦" : "聽到了 👂 請確認";
+  $("f-save").textContent = edit ? "✓ 儲存修改" : "✓ 加入待辦";
+  $("heard-text").style.display = edit ? "none" : "block";
+  if(!edit) $("heard-text").innerHTML="🎙️ 「"+escapeHtml(p.heard)+"」"+(p.dated?"":"<br><small style='color:#b06a2a'>沒聽到日期，先排在今天，可自行修改</small>");
   $("f-title").value=p.title;
   $("f-date").value=p.due;
   $("f-time").value=p.time||"";
@@ -413,22 +417,35 @@ $("f-remind").onclick=()=>$("f-remind").classList.toggle("on");
 $("f-save").onclick=()=>{
   const title=$("f-title").value.trim();
   if(!title){ toast("請輸入事項內容"); return; }
-  let items=[];
-  if(selCat==="buy"){
-    items=$("f-items").value.split(/[、,，\s]+/).filter(Boolean).map(n=>({name:n,done:false}));
+  const names = selCat==="buy" ? $("f-items").value.split(/[、,，\s]+/).filter(Boolean) : [];
+  if(editingTask){
+    const t=editingTask;
+    t.title=title; t.cat=selCat;
+    t.due=$("f-date").value||todayIso();
+    t.time=$("f-time").value||null;
+    t.remind=$("f-remind").classList.contains("on");
+    t.items=names.map(n=>{ const old=(t.items||[]).find(i=>i.name===n); return {name:n, done: old?old.done:false}; });
+    t.snooze=0;
+    toast("✓ 已更新");
+  }else{
+    tasks.push({
+      id:Date.now()+""+Math.floor(Math.random()*999),
+      title, cat:selCat, items:names.map(n=>({name:n,done:false})),
+      due:$("f-date").value||todayIso(),
+      time:$("f-time").value||null,
+      remind:$("f-remind").classList.contains("on"),
+      done:false, createdAt:new Date().toISOString(), snooze:0
+    });
+    toast("✓ 已加入待辦");
   }
-  tasks.push({
-    id:Date.now()+""+Math.floor(Math.random()*999),
-    title, cat:selCat, items,
-    due:$("f-date").value||todayIso(),
-    time:$("f-time").value||null,
-    remind:$("f-remind").classList.contains("on"),
-    done:false, createdAt:new Date().toISOString(), snooze:0
-  });
+  editingTask=null;
   save(); renderAll();
   $("confirm-overlay").classList.remove("show");
-  toast("✓ 已加入待辦");
 };
+function openEdit(t){
+  openConfirm({ heard:"", title:t.title, cat:t.cat, due:t.due, time:t.time,
+    remind:t.remind, items:(t.items||[]).map(i=>i.name), dated:true }, t);
+}
 
 /* ================= 語音辨識 ================= */
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
@@ -487,6 +504,7 @@ function openAction(t){
   $("action-overlay").classList.add("show");
 }
 $("a-cancel").onclick=()=>$("action-overlay").classList.remove("show");
+$("a-edit").onclick=()=>{ $("action-overlay").classList.remove("show"); if(actTask) openEdit(actTask); };
 $("a-tomorrow").onclick=()=>{ if(actTask){ actTask.due=iso(addDays(new Date(),1)); save(); renderAll(); toast("已延到明天"); } $("action-overlay").classList.remove("show"); };
 $("a-remind").onclick=()=>{ if(actTask){ actTask.remind=!actTask.remind; save(); renderAll(); toast(actTask.remind?"已開啟提醒":"已關閉提醒"); } $("action-overlay").classList.remove("show"); };
 $("a-delete").onclick=()=>{ if(actTask){ tasks=tasks.filter(x=>x.id!==actTask.id); save(); renderAll(); toast("已刪除"); } $("action-overlay").classList.remove("show"); };
@@ -518,7 +536,7 @@ function cardHtml(t,opt){
   let h=`<div class="${cls}" data-id="${t.id}">
     <div class="card-top">
       <button class="checkbox ${t.done?"done":""}" data-act="done"></button>
-      <div class="card-title ${t.done?"done":""}">${escapeHtml(t.title)}</div>
+      <div class="card-title ${t.done?"done":""}" data-act="edit">${escapeHtml(t.title)}</div>
       <button class="more-btn" data-act="more">⋯</button>
     </div>
     <div class="badges">
@@ -543,6 +561,7 @@ function bindCards(container){
     if(!t) return;
     el.querySelector('[data-act="done"]').onclick=()=>toggleDone(t);
     el.querySelector('[data-act="more"]').onclick=()=>openAction(t);
+    el.querySelector('[data-act="edit"]').onclick=()=>openEdit(t);
     el.querySelectorAll('[data-act="item"]').forEach(n=>{ n.onclick=()=>toggleItem(t,+n.dataset.idx); });
   });
 }
