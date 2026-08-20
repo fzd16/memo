@@ -21,7 +21,9 @@
   button { font-family:inherit; border:none; background:none; cursor:pointer; }
 
   /* ===== header ===== */
-  .app-header { padding:calc(14px + env(safe-area-inset-top)) 18px 4px; }
+  .app-header { padding:calc(14px + env(safe-area-inset-top)) 18px 4px; position:relative; }
+  .bellbtn { position:absolute; right:16px; top:calc(20px + env(safe-area-inset-top)); background:#fff; border:1px solid #e2ddd4; border-radius:18px; font-size:13px; font-weight:700; padding:8px 12px; color:#5a5a5a; }
+  .bellbtn.on { background:#EAF3EC; color:#2F7A4F; border-color:#bfe0cc; }
   .app-header .date { font-size:13px; color:#9a938a; font-weight:600; }
   .app-header h1 { font-size:23px; font-weight:800; margin-top:2px; }
 
@@ -143,6 +145,7 @@
   <div class="app-header">
     <div class="date" id="today-date"></div>
     <h1 id="today-title">今天要做的事 ☀️</h1>
+    <button class="bellbtn" id="notif-btn" style="display:none;">🔔 開啟通知</button>
   </div>
   <div class="chips" id="cat-chips"></div>
   <div class="tasks" id="today-list"></div>
@@ -279,7 +282,7 @@ const store = {
   set(v){ try{ localStorage.setItem("memoTasks",JSON.stringify(v)); }catch(e){ memStore.tasks=v; } }
 };
 let tasks = store.get();
-const save = () => store.set(tasks);
+const save = () => { store.set(tasks); scheduleSync(); };
 
 /* ================= 關鍵字解析 ================= */
 const GROCERY = ("中筋麵粉,高筋麵粉,低筋麵粉,廚房紙巾,鮮奶油,義大利麵,金針菇,杏鮑菇,雞胸肉,豬絞肉,五花肉,虱目魚,吳郭魚,小黃瓜,馬鈴薯,紅蘿蔔,白蘿蔔,高麗菜,青江菜,地瓜葉,空心菜,太白粉,番茄醬,沙茶醬,咖哩塊,衛生紙,濕紙巾,洗衣精,洗碗精,沐浴乳,洗髮精,保鮮膜,鋁箔紙,垃圾袋,洗手乳,漂白水,棉花棒,奇異果,麵粉,雞蛋,洋蔥,牛奶,鮮奶,吐司,麵包,白米,糙米,青蔥,大蒜,菠菜,番茄,茄子,青椒,甜椒,玉米,香菇,豆腐,豆干,雞肉,雞腿,豬肉,排骨,牛肉,鮭魚,蝦子,蛤蜊,透抽,醬油,砂糖,冰糖,米酒,香油,沙拉油,橄欖油,胡椒,味噌,泡麵,冬粉,米粉,麵條,水餃,饅頭,蘋果,香蕉,芭樂,橘子,柳丁,葡萄,西瓜,鳳梨,酪梨,檸檬,優格,起司,奶油,豆漿,果汁,咖啡,茶包,尿布,奶粉,電池,燈泡,肥皂,酒精,口罩,紙巾,雞,魚,蝦,蔥,薑,蒜,米,鹽,糖,醋,油,蛋")
@@ -698,12 +701,72 @@ function beep(){
   if(navigator.vibrate) navigator.vibrate([120,60,120]);
 }
 
+/* ================= 推播通知 ================= */
+const PUSH_SERVER="https://memo-push.ting791126.workers.dev";
+const VAPID_PUBLIC="BOWDLw7jwS7u42wlNSfbT_9y1l5hAS_0kFnqwJHMvTKFsOXAPhLx_eSAjLOGA4G7jjdbBhsIKEVRxDx_w_BEGuw";
+function deviceId(){
+  let id; try{ id=localStorage.getItem("memoDevice"); }catch(e){ id=memStore.dev; }
+  if(!id){ id="d"+Date.now().toString(36)+Math.random().toString(36).slice(2,8); try{ localStorage.setItem("memoDevice",id); }catch(e){ memStore.dev=id; } }
+  return id;
+}
+let syncTimer=null;
+function scheduleSync(){ clearTimeout(syncTimer); syncTimer=setTimeout(syncToServer,1500); }
+function syncToServer(){
+  try{
+    const payload=tasks.map(t=>({id:t.id,title:t.title,due:t.due,time:t.time,remind:!!t.remind,done:!!t.done,snooze:t.snooze||0}));
+    fetch(PUSH_SERVER+"/sync",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({device:deviceId(),tasks:payload})}).catch(()=>{});
+  }catch(e){}
+}
+function b64ToU8(s){
+  const pad="=".repeat((4-s.length%4)%4);
+  const b=atob((s+pad).replace(/-/g,"+").replace(/_/g,"/"));
+  const a=new Uint8Array(b.length);
+  for(let i=0;i<b.length;i++)a[i]=b.charCodeAt(i);
+  return a;
+}
+async function registerSW(){
+  if(!("serviceWorker" in navigator)) return null;
+  try{ return await navigator.serviceWorker.register("sw.js?device="+deviceId()); }catch(e){ return null; }
+}
+async function updateNotifBtn(){
+  const btn=$("notif-btn");
+  if(!("serviceWorker" in navigator)||!("PushManager" in window)){ btn.style.display="none"; return; }
+  btn.style.display="block";
+  try{
+    const reg=await navigator.serviceWorker.getRegistration();
+    const sub=reg && await reg.pushManager.getSubscription();
+    if(sub && Notification.permission==="granted"){ btn.textContent="🔔 通知已開啟"; btn.classList.add("on"); }
+    else{ btn.textContent="🔔 開啟通知"; btn.classList.remove("on"); }
+  }catch(e){}
+}
+$("notif-btn").onclick=async()=>{
+  if(!("Notification" in window)||!("PushManager" in window)){
+    toast("請先「加入主畫面」，從桌面圖示開啟後再設定通知"); return;
+  }
+  try{
+    const perm=await Notification.requestPermission();
+    if(perm!=="granted"){ toast("未允許通知，之後可再點此開啟"); return; }
+    const reg=await registerSW();
+    if(!reg){ toast("通知功能啟動失敗"); return; }
+    await navigator.serviceWorker.ready;
+    let sub=await reg.pushManager.getSubscription();
+    if(!sub) sub=await reg.pushManager.subscribe({userVisibleOnly:true, applicationServerKey:b64ToU8(VAPID_PUBLIC)});
+    const r=await fetch(PUSH_SERVER+"/subscribe",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({device:deviceId(),sub:sub.toJSON()})});
+    if(!r.ok) throw 0;
+    syncToServer();
+    fetch(PUSH_SERVER+"/test?device="+deviceId(),{method:"POST"}).catch(()=>{});
+    toast("✓ 通知已開啟，稍後會收到一則測試通知");
+    updateNotifBtn();
+  }catch(e){ toast("開啟通知失敗，請稍後再試一次"); }
+};
+
 /* ================= 啟動 ================= */
 function renderAll(){ renderToday(); if($("page-cal").classList.contains("show")) renderCal(); checkReminders(); }
 (function init(){
   const n=new Date();
   $("today-date").textContent=`${n.getMonth()+1}月${n.getDate()}日 星期${WEEK[n.getDay()]}`;
   renderAll();
+  registerSW(); updateNotifBtn(); scheduleSync();
   setTimeout(()=>checkReminders(true),800);
   setInterval(()=>checkReminders(false),30000);
   document.addEventListener("visibilitychange",()=>{ if(!document.hidden){ renderAll(); checkReminders(true); } });
