@@ -133,6 +133,10 @@
   .livebox.show { display:block; }
   .livebox .lb-hint { font-size:12px; color:#cfc8bc; margin-bottom:5px; font-weight:700; }
 
+  .mrow { display:flex; align-items:center; gap:10px; background:#fff; border:1px solid #eee7dc; border-radius:12px; padding:11px 13px; margin-bottom:8px; }
+  .mrow b { font-size:15px; }
+  .msub { font-size:12.5px; color:#9a938a; margin-top:3px; }
+  .mdel { color:#b5aea3; font-size:17px; padding:4px 6px; }
   .toast { position:fixed; bottom:calc(118px + env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%); background:#2B2B2B; color:#fff; font-size:14px; font-weight:600; padding:10px 18px; border-radius:20px; z-index:70; display:none; white-space:nowrap; box-shadow:0 6px 16px rgba(0,0,0,.25); }
 
   .page { display:none; } .page.show { display:block; }
@@ -215,6 +219,18 @@
     <div class="btnrow">
       <button class="btn ghost" id="t-cancel">取消</button>
       <button class="btn primary" id="t-ok">辨識內容 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== 多筆確認 ===================== -->
+<div class="overlay" id="multi-overlay">
+  <div class="sheet">
+    <h2 id="m-head"></h2>
+    <div id="m-list"></div>
+    <div class="btnrow">
+      <button class="btn ghost" id="m-cancel">取消</button>
+      <button class="btn primary" id="m-save">✓ 全部加入</button>
     </div>
   </div>
 </div>
@@ -411,7 +427,9 @@ function openConfirm(p, edit){
 }
 function syncItemsField(){
   const w=$("f-items-wrap");
-  if(selCat==="buy"){ w.style.display="block"; $("f-items").value=(pending.items||[]).join("、"); }
+  if(selCat==="buy" || (pending.items&&pending.items.length)){
+    w.style.display="block"; $("f-items").value=(pending.items||[]).join("、");
+  }
   else w.style.display="none";
 }
 function escapeHtml(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
@@ -420,7 +438,8 @@ $("f-remind").onclick=()=>$("f-remind").classList.toggle("on");
 $("f-save").onclick=()=>{
   const title=$("f-title").value.trim();
   if(!title){ toast("請輸入事項內容"); return; }
-  const names = selCat==="buy" ? $("f-items").value.split(/[、,，\s]+/).filter(Boolean) : [];
+  const itemsVisible = $("f-items-wrap").style.display!=="none";
+  const names = itemsVisible ? $("f-items").value.split(/[、,，\s]+/).filter(Boolean) : [];
   if(editingTask){
     const t=editingTask;
     t.title=title; t.cat=selCat;
@@ -437,6 +456,7 @@ $("f-save").onclick=()=>{
       due:$("f-date").value||todayIso(),
       time:$("f-time").value||null,
       remind:$("f-remind").classList.contains("on"),
+      recur:pending.recur||null,
       done:false, createdAt:new Date().toISOString(), snooze:0
     });
     toast("✓ 已加入待辦");
@@ -448,6 +468,79 @@ $("f-save").onclick=()=>{
 function openEdit(t){
   openConfirm({ heard:"", title:t.title, cat:t.cat, due:t.due, time:t.time,
     remind:t.remind, items:(t.items||[]).map(i=>i.name), dated:true }, t);
+}
+
+/* ================= AI 智慧解析（失敗自動退回規則解析） ================= */
+function normalizeAI(x,heard){
+  const cat=["buy","sch","baby","oth"].includes(x.cat)?x.cat:"oth";
+  const recur=(x.recur&&["daily","weekly","monthly"].includes(x.recur.freq))?x.recur:null;
+  return { heard, title:(x.title||heard).trim(), cat,
+    due:/^\d{4}-\d{2}-\d{2}$/.test(x.due||"")?x.due:todayIso(),
+    time:/^([01]\d|2[0-3]):[0-5]\d$/.test(x.time||"")?x.time:null,
+    remind:!!x.remind,
+    items:Array.isArray(x.items)?x.items.filter(i=>typeof i==="string"&&i.trim()).map(i=>i.trim()):[],
+    recur, dated:true };
+}
+function showParsing(on){
+  if(on){ $("livebox").classList.add("show"); $("livebox").querySelector(".lb-hint").textContent="🧠 正在理解內容…"; $("live-text").textContent="請稍候"; }
+  else { $("livebox").classList.remove("show"); $("livebox").querySelector(".lb-hint").textContent="正在聽… 說完請再點一下麥克風"; }
+}
+async function smartParse(text){
+  showParsing(true);
+  try{
+    const ctrl=new AbortController(); const to=setTimeout(()=>ctrl.abort(),9000);
+    const r=await fetch(PUSH_SERVER+"/parse",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text}),signal:ctrl.signal});
+    clearTimeout(to);
+    if(!r.ok) throw 0;
+    const j=await r.json();
+    if(!j.tasks||!j.tasks.length) throw 0;
+    showParsing(false);
+    const list=j.tasks.map(x=>normalizeAI(x,text));
+    if(list.length===1) openConfirm(list[0]); else openMulti(list);
+  }catch(e){ showParsing(false); openConfirm(parseInput(text)); }
+}
+
+/* ================= 多筆待辦確認 ================= */
+let multiList=[];
+function openMulti(list){ multiList=list; renderMulti(); $("multi-overlay").classList.add("show"); }
+function renderMulti(){
+  $("m-head").textContent="一次聽到 "+multiList.length+" 件事 👂";
+  $("m-list").innerHTML=multiList.map((p,i)=>
+    `<div class="mrow"><div style="flex:1;"><b>${escapeHtml(p.title)}</b>
+      <div class="msub">${catOf(p.cat).name}｜${fmtMD(p.due)} ${dayLabel(p.due)}${p.time?" "+p.time:""}${p.remind?"｜🔔提醒":""}${p.recur?"｜🔁":""}</div></div>
+      <button class="mdel" data-i="${i}">✕</button></div>`).join("");
+  [...$("m-list").querySelectorAll(".mdel")].forEach(b=>b.onclick=()=>{
+    multiList.splice(+b.dataset.i,1);
+    if(!multiList.length) $("multi-overlay").classList.remove("show"); else renderMulti();
+  });
+}
+$("m-cancel").onclick=()=>$("multi-overlay").classList.remove("show");
+$("m-save").onclick=()=>{
+  const n=multiList.length;
+  multiList.forEach((p,i)=>{
+    tasks.push({ id:Date.now()+""+i+Math.floor(Math.random()*999),
+      title:p.title, cat:p.cat, items:(p.items||[]).map(x=>({name:x,done:false})),
+      due:p.due, time:p.time, remind:p.remind, recur:p.recur||null,
+      done:false, createdAt:new Date().toISOString(), snooze:0 });
+  });
+  save(); renderAll();
+  $("multi-overlay").classList.remove("show");
+  toast("✓ 已加入 "+n+" 筆待辦");
+};
+
+/* ================= 週期性任務 ================= */
+function recurLabel(r){
+  return r.freq==="daily"?"每天":r.freq==="weekly"?"每週"+WEEK[r.weekday??new Date().getDay()]:"每月"+(r.day||"")+"號";
+}
+function nextRecurDate(t){
+  let d=new Date(t.due+"T00:00:00");
+  const today=new Date(todayIso()+"T00:00:00");
+  do{
+    if(t.recur.freq==="daily") d=addDays(d,1);
+    else if(t.recur.freq==="weekly") d=addDays(d,7);
+    else { d=new Date(d.getFullYear(),d.getMonth()+1,Math.min(t.recur.day||d.getDate(),28)); }
+  }while(d<=today);
+  return iso(d);
 }
 
 /* ================= 語音辨識 ================= */
@@ -465,7 +558,13 @@ $("mic-btn").onclick=()=>{
         if(e.results[i].isFinal) finalText+=e.results[i][0].transcript;
         else interim+=e.results[i][0].transcript;
       }
-      $("live-text").textContent=(finalText+interim)||"…";
+      const combined=(finalText+interim).trim();
+      $("live-text").textContent=combined||"…";
+      /* 說「over」自動結束錄音 */
+      if(/over[\s。．.!！]*$/i.test(combined)){
+        finalText=combined.replace(/over[\s。．.!！]*$/i,"").trim();
+        stopRec();
+      }
     };
     rec.onerror=ev=>{
       stopUI();
@@ -475,7 +574,7 @@ $("mic-btn").onclick=()=>{
     rec.onend=()=>{
       stopUI();
       const t=finalText.trim();
-      if(t) openConfirm(parseInput(t));
+      if(t) smartParse(t);
     };
     rec.start();
     listening=true;
@@ -495,7 +594,7 @@ $("t-ok").onclick=()=>{
   const v=$("t-input").value.trim();
   if(!v){ toast("請先輸入內容"); return; }
   $("text-overlay").classList.remove("show");
-  openConfirm(parseInput(v));
+  smartParse(v);
 };
 
 /* ================= 任務操作 ================= */
@@ -515,8 +614,16 @@ function toggleDone(t){
   t.done=!t.done;
   t.completedAt=t.done?new Date().toISOString():null;
   if(t.done && t.items) t.items.forEach(i=>i.done=true);
+  if(t.done && t.recur){
+    const next=nextRecurDate(t);
+    tasks.push({ id:Date.now()+"r"+Math.floor(Math.random()*999),
+      title:t.title, cat:t.cat, items:(t.items||[]).map(i=>({name:i.name,done:false})),
+      due:next, time:t.time, remind:t.remind, recur:t.recur,
+      done:false, createdAt:new Date().toISOString(), snooze:0 });
+    toast("🎉 完成！已自動排入下次："+fmtMD(next));
+  }
   save(); renderAll();
-  if(t.done) toast("🎉 完成一項！");
+  if(t.done && !t.recur) toast("🎉 完成一項！");
 }
 function toggleItem(t,idx){
   t.items[idx].done=!t.items[idx].done;
@@ -545,6 +652,7 @@ function cardHtml(t,opt){
     <div class="badges">
       <span class="badge" style="background:${c.bg};color:${c.fg};">${c.name}</span>
       <span class="badge b-time">${badgeDue(t)}</span>
+      ${t.recur?`<span class="badge b-time">🔁 ${recurLabel(t.recur)}</span>`:""}
       ${t.remind&&!t.done?'<span class="badge b-alert">🔔 提醒</span>':""}
     </div>`;
   if(t.items && t.items.length && !t.done){
