@@ -8,7 +8,9 @@ self.addEventListener("push", e => {
     try {
       const r = await fetch(WORKER_URL + "/pending?device=" + DEVICE);
       const j = await r.json();
-      if (j.items && j.items.length) {
+      if (j.summary) {
+        body = j.summary; // AI 早安摘要
+      } else if (j.items && j.items.length) {
         body = j.items.slice(0, 5).map(t => "・" + t).join("\n") + (j.items.length > 5 ? "\n…等 " + j.items.length + " 件" : "");
       }
     } catch (err) {}
