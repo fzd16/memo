@@ -749,6 +749,13 @@ function renderCal(){
     h+= items.length? items.map(t=>cardHtml(t)).join("") : '<div class="collapse-row">今天沒有安排 🌿</div>';
   });
   flushEmpty();
+  /* 更遠的計畫（14 天以後） */
+  const far=tasks.filter(t=>t.due>days[13]&&!t.done)
+    .sort((a,b)=>a.due<b.due?-1:a.due>b.due?1:((a.time||"99")<(b.time||"99")?-1:1));
+  if(far.length){
+    h+=`<div class="dayhead">📆 更遠的計畫 <small>14 天以後・共 ${far.length} 件</small></div>`;
+    h+=far.map(t=>cardHtml(t,{noRed:true})).join("");
+  }
   ag.innerHTML=h; bindCards(ag);
 }
 
