@@ -79,7 +79,7 @@
 
   /* ===== bottom bar ===== */
   .bottombar { position:fixed; left:0; right:0; bottom:0; background:rgba(250,248,245,.96); backdrop-filter:blur(10px); border-top:1px solid #e2ddd4; display:flex; align-items:flex-end; justify-content:space-around; padding:8px 10px calc(10px + env(safe-area-inset-bottom)); z-index:20; }
-  .tabbtn { display:flex; flex-direction:column; align-items:center; gap:2px; font-size:11.5px; font-weight:700; color:#9a938a; width:84px; padding:6px 0; }
+  .tabbtn { display:flex; flex-direction:column; align-items:center; gap:2px; font-size:11px; font-weight:700; color:#9a938a; width:62px; padding:6px 0; }
   .tabbtn .ic { font-size:22px; }
   .tabbtn.active { color:#2B2B2B; }
   .micwrap { display:flex; flex-direction:column; align-items:center; margin-top:-34px; }
@@ -140,6 +140,22 @@
   .toast { position:fixed; bottom:calc(118px + env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%); background:#2B2B2B; color:#fff; font-size:14px; font-weight:600; padding:10px 18px; border-radius:20px; z-index:70; display:none; white-space:nowrap; box-shadow:0 6px 16px rgba(0,0,0,.25); }
 
   .page { display:none; } .page.show { display:block; }
+
+  /* ===== 紀錄頁 ===== */
+  .hist-search { padding:12px 18px 0; }
+  .hist-search input { width:100%; font-size:16px; padding:12px 14px; border-radius:14px; border:1px solid #ddd6ca; background:#fff; font-family:inherit; color:#2B2B2B; -webkit-appearance:none; }
+  .ans-card { background:#2B2B2B; color:#fff; border-radius:18px; padding:16px 17px; }
+  .ans-card .a1 { font-size:13px; color:#cfc8bc; font-weight:700; }
+  .ans-card .a2 { font-size:24px; font-weight:800; margin-top:4px; }
+  .ans-card .a3 { font-size:14px; color:#cfc8bc; margin-top:7px; line-height:1.5; }
+  .avg-line { font-size:13px; color:#2F7A4F; background:#EAF3EC; border-radius:12px; padding:9px 12px; font-weight:700; text-align:center; }
+  .hrow { background:#fff; border:1px solid #eee7dc; border-radius:14px; padding:12px 14px; display:flex; align-items:center; gap:10px; }
+  .hrow .hdot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+  .hrow .ht { flex:1; font-size:15px; font-weight:600; color:#4a4a4a; word-break:break-all; }
+  .hrow .hd { font-size:12px; color:#9a938a; text-align:right; flex-shrink:0; line-height:1.5; }
+  .hrow .hd b { display:block; color:#7a7263; font-size:13px; }
+  .gap-tag { text-align:center; font-size:12px; color:#b5aea3; padding:1px 0; }
+  .month-h { font-size:13px; font-weight:800; color:#9a938a; margin:10px 4px 0; }
 </style>
 </head>
 <body>
@@ -165,15 +181,27 @@
   <div class="ag" id="cal-agenda"></div>
 </div>
 
+<!-- ===================== 紀錄頁 ===================== -->
+<div class="page" id="page-hist">
+  <div class="app-header">
+    <div class="date">完成打勾的事都自動保存在這裡</div>
+    <h1>紀錄查詢 📖</h1>
+  </div>
+  <div class="hist-search"><input type="search" id="h-q" placeholder="🔍 輸入關鍵字，例如：指甲、雞蛋"></div>
+  <div class="chips" id="h-chips"></div>
+  <div class="tasks" id="h-body"></div>
+</div>
+
 <!-- ===================== 底部列 ===================== -->
 <button class="kbbtn" id="kb-btn" title="打字輸入">⌨️</button>
 <div class="bottombar">
   <button class="tabbtn active" id="tab-today"><span class="ic">☀️</span>今天</button>
+  <button class="tabbtn" id="tab-cal"><span class="ic">📅</span>未來14天</button>
   <div class="micwrap">
     <button class="micbtn" id="mic-btn">🎙️</button>
     <div class="michint" id="mic-hint">點一下說話</div>
   </div>
-  <button class="tabbtn" id="tab-cal"><span class="ic">📅</span>未來14天</button>
+  <button class="tabbtn" id="tab-hist"><span class="ic">📖</span>紀錄</button>
 </div>
 
 <!-- ===================== 語音即時字幕 ===================== -->
@@ -763,12 +791,83 @@ function renderCal(){
 function showPage(p){
   $("page-today").classList.toggle("show",p==="today");
   $("page-cal").classList.toggle("show",p==="cal");
+  $("page-hist").classList.toggle("show",p==="hist");
   $("tab-today").classList.toggle("active",p==="today");
   $("tab-cal").classList.toggle("active",p==="cal");
+  $("tab-hist").classList.toggle("active",p==="hist");
   window.scrollTo(0,0);
 }
 $("tab-today").onclick=()=>showPage("today");
 $("tab-cal").onclick=()=>{ renderCal(); showPage("cal"); };
+$("tab-hist").onclick=()=>{ renderHist(); showPage("hist"); };
+
+/* ================= 紀錄查詢頁 ================= */
+let histQuery="", histCat="all";
+function doneDate(t){ return ((t.completedAt||"").slice(0,10)) || t.due; }
+function daysAgo(dIso){ return Math.round((new Date(todayIso()+"T00:00:00")-new Date(dIso+"T00:00:00"))/86400000); }
+function agoLabel(d){
+  if(d<=0) return "今天"; if(d===1) return "昨天";
+  if(d<14) return d+" 天前";
+  if(d<60) return "約 "+Math.round(d/7)+" 週前";
+  if(d<365) return "約 "+Math.round(d/30)+" 個月前";
+  return "約 "+(d/365).toFixed(1)+" 年前";
+}
+function histDate(dd){ const[y,m,d]=dd.split("-").map(Number); return (y!==new Date().getFullYear()?y+"/":"")+m+"/"+d; }
+function histRow(t){
+  const dd=doneDate(t), c=catOf(t.cat);
+  return `<div class="hrow"><span class="hdot" style="background:${c.color}"></span><span class="ht">${escapeHtml(t.title)}</span><span class="hd"><b>${histDate(dd)}</b>${agoLabel(daysAgo(dd))}</span></div>`;
+}
+function renderHistChips(){
+  const wrap=$("h-chips"); wrap.innerHTML="";
+  [{key:"all",name:"全部"},...CATS].forEach(c=>{
+    const b=document.createElement("button");
+    b.className="chip"+(histCat===c.key?" active":""); b.textContent=c.name;
+    b.onclick=()=>{ histCat=c.key; renderHist(); };
+    wrap.appendChild(b);
+  });
+}
+function renderHist(){
+  renderHistChips();
+  const body=$("h-body");
+  const vis=t=>histCat==="all"||t.cat===histCat;
+  const done=tasks.filter(t=>t.done&&vis(t)).sort((a,b)=>doneDate(a)>doneDate(b)?-1:1);
+  const q=histQuery.trim();
+  let h="";
+  if(q){
+    const m=done.filter(t=>t.title.includes(q)||(t.items||[]).some(i=>i.name.includes(q)));
+    if(!m.length){ body.innerHTML=`<div class="empty-state">找不到包含「${escapeHtml(q)}」的完成紀錄</div>`; return; }
+    const last=m[0], dd=doneDate(last);
+    h+=`<div class="ans-card">
+      <div class="a1">上次「${escapeHtml(q)}」是…</div>
+      <div class="a2">${agoLabel(daysAgo(dd))}</div>
+      <div class="a3">${histDate(dd)}・${escapeHtml(last.title)}</div>
+    </div>`;
+    if(m.length>=3){
+      const ds=m.map(t=>new Date(doneDate(t))).sort((a,b)=>a-b);
+      const avg=Math.round((ds[ds.length-1]-ds[0])/86400000/(ds.length-1));
+      if(avg>0) h+=`<div class="avg-line">共 ${m.length} 次紀錄・平均約每 ${avg<14?avg+" 天":Math.round(avg/7)+" 週"}一次</div>`;
+    }
+    h+='<div class="group-label">歷史紀錄</div>';
+    m.forEach((t,i)=>{
+      h+=histRow(t);
+      if(i<m.length-1){
+        const gap=Math.round((new Date(doneDate(t))-new Date(doneDate(m[i+1])))/86400000);
+        if(gap>0) h+=`<div class="gap-tag">↑ 間隔 ${gap} 天</div>`;
+      }
+    });
+  }else{
+    if(!done.length){ body.innerHTML='<div class="empty-state">還沒有完成的紀錄 🌿<br>事項完成打勾後會自動保存在這裡</div>'; return; }
+    let cur="";
+    done.forEach(t=>{
+      const mth=doneDate(t).slice(0,7);
+      if(mth!==cur){ cur=mth; const[y,mo]=mth.split("-"); h+=`<div class="month-h">${y} 年 ${+mo} 月</div>`; }
+      h+=histRow(t);
+    });
+  }
+  body.innerHTML=h;
+}
+let hqTimer=null;
+$("h-q").addEventListener("input",()=>{ clearTimeout(hqTimer); hqTimer=setTimeout(()=>{ histQuery=$("h-q").value; renderHist(); },250); });
 
 /* ================= 提醒 ================= */
 let lastBannerKey="";
@@ -876,7 +975,7 @@ $("notif-btn").onclick=async()=>{
 };
 
 /* ================= 啟動 ================= */
-function renderAll(){ renderToday(); if($("page-cal").classList.contains("show")) renderCal(); checkReminders(); }
+function renderAll(){ renderToday(); if($("page-cal").classList.contains("show")) renderCal(); if($("page-hist").classList.contains("show")) renderHist(); checkReminders(); }
 (function init(){
   const n=new Date();
   $("today-date").textContent=`${n.getMonth()+1}月${n.getDate()}日 星期${WEEK[n.getDay()]}`;
