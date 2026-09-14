@@ -156,6 +156,10 @@
   .hrow .hd b { display:block; color:#7a7263; font-size:13px; }
   .gap-tag { text-align:center; font-size:12px; color:#b5aea3; padding:1px 0; }
   .month-h { font-size:13px; font-weight:800; color:#9a938a; margin:10px 4px 0; }
+  .siri-box { margin:24px 18px 10px; background:#F3EFE8; border-radius:14px; padding:13px 14px; }
+  .siri-box .sb-t { font-size:13px; font-weight:800; color:#7a7263; }
+  .siri-box .sb-hint { font-size:12px; color:#9a938a; margin-top:4px; line-height:1.6; }
+  .siri-box .sb-url { display:block; width:100%; margin-top:8px; background:#fff; border:1px dashed #cfc8bc; border-radius:10px; padding:9px 11px; font-size:11.5px; color:#5a5a5a; word-break:break-all; text-align:left; font-family:monospace; }
 </style>
 </head>
 <body>
@@ -190,6 +194,11 @@
   <div class="hist-search"><input type="search" id="h-q" placeholder="🔍 輸入關鍵字，例如：指甲、雞蛋"></div>
   <div class="chips" id="h-chips"></div>
   <div class="tasks" id="h-body"></div>
+  <div class="siri-box">
+    <div class="sb-t">🗣️ Siri 捷徑設定網址（設定一次即可）</div>
+    <div class="sb-hint">在「捷徑」App 的「文字」動作中貼上此網址。點下方即可複製：</div>
+    <button class="sb-url" id="siri-url"></button>
+  </div>
 </div>
 
 <!-- ===================== 底部列 ===================== -->
@@ -869,6 +878,36 @@ function renderHist(){
 let hqTimer=null;
 $("h-q").addEventListener("input",()=>{ clearTimeout(hqTimer); hqTimer=setTimeout(()=>{ histQuery=$("h-q").value; renderHist(); },250); });
 
+/* ================= Siri 雲端收件匣 ================= */
+function siriUrl(){ return PUSH_SERVER+"/siri?device="+deviceId()+"&text="; }
+$("siri-url").textContent="";
+function initSiriBox(){
+  $("siri-url").textContent=siriUrl();
+  $("siri-url").onclick=async()=>{
+    try{ await navigator.clipboard.writeText(siriUrl()); toast("✓ 已複製，到「捷徑」App 貼上"); }
+    catch(e){ toast("請長按網址手動複製"); }
+  };
+}
+let inboxBusy=false;
+async function fetchInbox(){
+  if(inboxBusy) return; inboxBusy=true;
+  try{
+    const r=await fetch(PUSH_SERVER+"/inbox?device="+deviceId());
+    if(!r.ok) throw 0;
+    const j=await r.json();
+    const items=(j.items||[]).filter(it=>it&&it.id&&!tasks.some(t=>t.id===it.id));
+    if(items.length){
+      items.forEach(it=>tasks.push(it));
+      save(); renderAll();
+      toast("🗣️ 已從 Siri 加入 "+items.length+" 筆待辦");
+    }
+    if((j.items||[]).length){
+      await fetch(PUSH_SERVER+"/inbox_ack",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({device:deviceId(),ids:(j.items||[]).map(it=>it.id)})});
+    }
+  }catch(e){}
+  inboxBusy=false;
+}
+
 /* ================= 提醒 ================= */
 let lastBannerKey="";
 function dueForRemind(t){
@@ -980,10 +1019,19 @@ function renderAll(){ renderToday(); if($("page-cal").classList.contains("show")
   const n=new Date();
   $("today-date").textContent=`${n.getMonth()+1}月${n.getDate()}日 星期${WEEK[n.getDay()]}`;
   renderAll();
-  registerSW(); updateNotifBtn(); scheduleSync();
+  registerSW(); updateNotifBtn(); scheduleSync(); initSiriBox(); fetchInbox();
+  setInterval(fetchInbox,120000);
+  /* Siri 捷徑帶入的語音文字：?text=... 自動解析 */
+  try{
+    const vt=new URLSearchParams(location.search).get("text");
+    if(vt && vt.trim()){
+      history.replaceState(null,"",location.pathname);
+      setTimeout(()=>smartParse(vt.trim()),400);
+    }
+  }catch(e){}
   setTimeout(()=>checkReminders(true),800);
   setInterval(()=>checkReminders(false),30000);
-  document.addEventListener("visibilitychange",()=>{ if(!document.hidden){ renderAll(); checkReminders(true); } });
+  document.addEventListener("visibilitychange",()=>{ if(!document.hidden){ fetchInbox(); renderAll(); checkReminders(true); } });
 })();
 </script>
 </body>
