@@ -159,6 +159,43 @@
   .siri-box { margin:24px 18px 10px; background:#F3EFE8; border-radius:14px; padding:13px 14px; }
   .siri-box .sb-t { font-size:13px; font-weight:800; color:#7a7263; }
   .siri-box .sb-hint { font-size:12px; color:#9a938a; margin-top:4px; line-height:1.6; }
+  /* ===== 記得要做 ===== */
+  .tabbtn .ic { position:relative; }
+  .tbadge { position:absolute; top:-4px; left:16px; background:#E05A4E; color:#fff; font-size:10px; font-weight:800; line-height:15px; min-width:15px; padding:0 4px; border-radius:8px; font-style:normal; }
+  .tbadge:empty { display:none; }
+  .some-rev { margin:10px 14px 2px; background:#2B2B2B; color:#fff; border-radius:16px; padding:13px 15px; display:flex; align-items:center; gap:12px; width:calc(100% - 28px); text-align:left; }
+  .some-rev .ic2 { font-size:25px; }
+  .some-rev .t1 { font-weight:800; font-size:15px; }
+  .some-rev .t2 { font-size:12.5px; color:#cfc8bc; margin-top:2px; }
+  .some-rev .go { margin-left:auto; background:#E05A4E; font-size:13px; font-weight:800; padding:8px 12px; border-radius:10px; white-space:nowrap; }
+  .sgrp { font-size:13px; font-weight:800; color:#9a938a; margin:16px 18px 7px; display:flex; justify-content:space-between; }
+  .slist { padding:0 14px; display:flex; flex-direction:column; gap:8px; }
+  .scard { background:#fff; border:1px solid #eee7dc; border-radius:14px; padding:12px 12px 10px; }
+  .scard.old { border-color:#F0C9A8; background:#FFFAF5; }
+  .smeta { display:flex; align-items:center; gap:6px; margin:7px 0 0 37px; flex-wrap:wrap; }
+  .sage { font-size:12px; color:#9a938a; font-weight:600; }
+  .sage.warn { color:#B06A2A; font-weight:800; }
+  .sitems { font-size:12px; color:#7a7263; background:#F3EFE8; padding:2px 8px; border-radius:10px; }
+  .ssched { margin-left:auto; font-size:12.5px; font-weight:800; color:#3A62A8; background:#EAF0FA; padding:6px 10px; border-radius:10px; }
+  .rev-sheet { min-height:70vh; }
+  .rev-top { display:flex; justify-content:space-between; align-items:center; font-size:13px; font-weight:800; color:#9a938a; margin-bottom:8px; }
+  .rev-top button { font-size:13px; font-weight:700; color:#9a938a; padding:4px 2px; }
+  .rev-bar { height:6px; background:#e8e2d8; border-radius:3px; margin-bottom:18px; overflow:hidden; }
+  .rev-bar i { display:block; height:100%; width:0; background:#E05A4E; border-radius:3px; transition:width .25s; }
+  .rev-card { background:#fff; border:1px solid #eee7dc; border-radius:20px; padding:24px 18px; text-align:center; box-shadow:0 6px 16px rgba(0,0,0,.06); }
+  .rev-card .rc-cat { font-size:12.5px; font-weight:700; display:inline-block; padding:3px 10px; border-radius:12px; }
+  .rev-card .rc-t { font-size:21px; font-weight:800; margin:12px 0 6px; line-height:1.4; word-break:break-all; }
+  .rev-card .rc-a { font-size:13px; color:#9a938a; font-weight:700; }
+  .rev-card .rc-a.warn { color:#B06A2A; }
+  .rev-acts { display:flex; flex-direction:column; gap:9px; margin-top:18px; }
+  .rev-acts .ra { padding:15px; border-radius:14px; text-align:center; font-size:16px; font-weight:800; }
+  .rev-acts .ra1 { background:#E05A4E; color:#fff; }
+  .rev-acts .ra2 { background:#fff; border:1.5px solid #ddd6ca; color:#5a5a5a; }
+  .rev-acts .ra3 { color:#b5aea3; font-size:14px; font-weight:700; padding:8px; }
+  .rev-done { text-align:center; padding:30px 10px 10px; }
+  .rev-done .big { font-size:46px; }
+  .rev-done h3 { font-size:20px; margin:10px 0 8px; }
+  .rev-done p { font-size:14.5px; color:#6b6b6b; line-height:1.8; }
   .siri-box .sb-url { display:block; width:100%; margin-top:8px; background:#fff; border:1px dashed #cfc8bc; border-radius:10px; padding:9px 11px; font-size:11.5px; color:#5a5a5a; word-break:break-all; text-align:left; font-family:monospace; }
 </style>
 </head>
@@ -183,6 +220,17 @@
   </div>
   <div class="strip" id="cal-strip"></div>
   <div class="ag" id="cal-agenda"></div>
+</div>
+
+<!-- ===================== 記得要做頁 ===================== -->
+<div class="page" id="page-some">
+  <div class="app-header">
+    <div class="date">沒有期限，想到再做</div>
+    <h1 id="some-title">記得要做 🧺</h1>
+  </div>
+  <div id="some-review"></div>
+  <div class="chips" id="some-chips"></div>
+  <div id="some-body"></div>
 </div>
 
 <!-- ===================== 紀錄頁 ===================== -->
@@ -210,6 +258,7 @@
     <button class="micbtn" id="mic-btn">🎙️</button>
     <div class="michint" id="mic-hint">點一下說話</div>
   </div>
+  <button class="tabbtn" id="tab-some"><span class="ic">🧺<span class="tbadge" id="some-badge"></span></span>記得要做</button>
   <button class="tabbtn" id="tab-hist"><span class="ic">📖</span>紀錄</button>
 </div>
 
@@ -230,11 +279,18 @@
       <input type="text" id="f-items">
     </div>
     <div class="field"><label>分類</label><div class="catrow" id="f-cats"></div></div>
-    <div class="field" style="display:flex; gap:10px;">
+    <div class="field">
+      <label>期限</label>
+      <div class="catrow">
+        <button class="catopt" id="f-mode-some">🧺 記得要做（不限日期）</button>
+        <button class="catopt" id="f-mode-date">📅 指定日期</button>
+      </div>
+    </div>
+    <div class="field" id="f-date-wrap" style="display:flex; gap:10px;">
       <div style="flex:1;"><label>日期</label><input type="date" id="f-date"></div>
       <div style="flex:1;"><label>時間（可留白）</label><input type="time" id="f-time"></div>
     </div>
-    <div class="field">
+    <div class="field" id="f-remind-wrap">
       <div class="togglerow">
         <div class="tl">🔔 持續提醒<small>完成打勾前，每次打開 App 都會提醒</small></div>
         <div class="switch" id="f-remind"></div>
@@ -286,6 +342,31 @@
   </div>
 </div>
 
+<!-- ===================== 排日期 ===================== -->
+<div class="overlay" id="sched-overlay" style="z-index:56;">
+  <div class="sheet">
+    <h2 id="s-head" style="font-size:17px;"></h2>
+    <div class="catrow" id="s-quick"></div>
+    <div class="field" style="display:flex; gap:10px; margin-top:14px;">
+      <div style="flex:1;"><label>或選日期</label><input type="date" id="s-date"></div>
+      <div style="flex:1;"><label>時間（可留白）</label><input type="time" id="s-time"></div>
+    </div>
+    <div class="btnrow">
+      <button class="btn ghost" id="s-cancel">取消</button>
+      <button class="btn primary" id="s-ok">✓ 排進行事曆</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== 每週整理 ===================== -->
+<div class="overlay" id="rev-overlay">
+  <div class="sheet rev-sheet">
+    <div class="rev-top"><span id="rev-prog"></span><button id="rev-close">✕ 結束</button></div>
+    <div class="rev-bar"><i id="rev-barfill"></i></div>
+    <div id="rev-body"></div>
+  </div>
+</div>
+
 <!-- ===================== 提醒橫幅 ===================== -->
 <div class="remind-banner" id="banner">
   <div class="bell">🔔</div>
@@ -324,6 +405,7 @@ const CATS = [
   {key:"buy",  name:"🛒 家庭採買", color:"#3E9C6C", bg:"#EAF3EC", fg:"#2F7A4F"},
   {key:"sch",  name:"🎒 壯壯上學", color:"#3A62A8", bg:"#EAF0FA", fg:"#3A62A8"},
   {key:"baby", name:"👶 大福照顧", color:"#E08A2E", bg:"#FBF0E6", fg:"#B06A2A"},
+  {key:"work", name:"💼 工作",     color:"#2E8B99", bg:"#E6F4F6", fg:"#1F6F7A"},
   {key:"oth",  name:"📌 其他",     color:"#8a7fb5", bg:"#EFEAF7", fg:"#6a5c9e"}
 ];
 const catOf = k => CATS.find(c=>c.key===k)||CATS[3];
@@ -341,6 +423,7 @@ const save = () => { store.set(tasks); scheduleSync(); };
 const GROCERY = ("中筋麵粉,高筋麵粉,低筋麵粉,廚房紙巾,鮮奶油,義大利麵,金針菇,杏鮑菇,雞胸肉,豬絞肉,五花肉,虱目魚,吳郭魚,小黃瓜,馬鈴薯,紅蘿蔔,白蘿蔔,高麗菜,青江菜,地瓜葉,空心菜,太白粉,番茄醬,沙茶醬,咖哩塊,衛生紙,濕紙巾,洗衣精,洗碗精,沐浴乳,洗髮精,保鮮膜,鋁箔紙,垃圾袋,洗手乳,漂白水,棉花棒,奇異果,麵粉,雞蛋,洋蔥,牛奶,鮮奶,吐司,麵包,白米,糙米,青蔥,大蒜,菠菜,番茄,茄子,青椒,甜椒,玉米,香菇,豆腐,豆干,雞肉,雞腿,豬肉,排骨,牛肉,鮭魚,蝦子,蛤蜊,透抽,醬油,砂糖,冰糖,米酒,香油,沙拉油,橄欖油,胡椒,味噌,泡麵,冬粉,米粉,麵條,水餃,饅頭,蘋果,香蕉,芭樂,橘子,柳丁,葡萄,西瓜,鳳梨,酪梨,檸檬,優格,起司,奶油,豆漿,果汁,咖啡,茶包,尿布,奶粉,電池,燈泡,肥皂,酒精,口罩,紙巾,雞,魚,蝦,蔥,薑,蒜,米,鹽,糖,醋,油,蛋")
   .split(",").sort((a,b)=>b.length-a.length);
 const SCH_KW = ["壯壯","上學","學校","老師","聯絡簿","班親會","校外教學","接送","放學","功課","作業","便當","水壺","繳費","幼兒園","幼稚園","才藝","家長會","運動會"];
+const WORK_KW = ["工作","公司","上班","加班","開會","會議","客戶","廠商","報告","簡報","老闆","主管","同事","出差","報價","訂單","合約","請款","發票","專案","業務","出貨","交貨","打卡","面試"];
 const BABY_KW = ["大福","疫苗","餵藥","吃藥","副食品","洗澡","看醫生","預防針","健兒門診","收涎","保母"];
 const NUMMAP = {"零":0,"一":1,"二":2,"兩":2,"三":3,"四":4,"五":5,"六":6,"七":7,"八":8,"九":9};
 function zhNum(s){
@@ -397,7 +480,6 @@ function parseInput(raw){
       if(mo&&da){ let d=new Date(now.getFullYear(),mo-1,da); if(iso(d)<todayIso()) d.setFullYear(d.getFullYear()+1); due=iso(d); s=s.replace(m[0],""); }
     }
   }
-  if(!due){ due=todayIso(); dated=false; }
   /* --- 時間 --- */
   let time=null;
   let tm=s.match(/([0-2]?[0-9])[:：]([0-5][0-9])/);
@@ -416,6 +498,9 @@ function parseInput(raw){
       }
     }
   }
+  /* 有講幾點但沒講哪天 → 今天；完全沒講日期與時間 → 記得要做（不限日期） */
+  if(!due && time) due=todayIso();
+  dated=!!due;
   /* --- 去除贅詞 --- */
   s=s.replace(/要記得|記得|別忘了|別忘|提醒我|提醒|幫我|我要|然後|再來|另外/g,"").trim();
   /* --- 分類 --- */
@@ -423,6 +508,7 @@ function parseInput(raw){
   const hasBuy=/購買|採買|買/.test(s);
   if(/壯壯/.test(s)) cat="sch";
   else if(/大福/.test(s)) cat="baby";
+  else if(WORK_KW.some(k=>s.includes(k))) cat="work";
   else if(hasBuy) cat="buy";
   else if(SCH_KW.some(k=>s.includes(k))) cat="sch";
   else if(BABY_KW.some(k=>s.includes(k))) cat="baby";
@@ -437,7 +523,7 @@ function parseInput(raw){
     }
   }
   if(!title) title=heard;
-  return { heard, title, cat, due, time, remind, items, dated };
+  return { heard, title, cat, due, time, remind, items, dated, someday:!due };
 }
 
 /* ================= 新增流程（確認視窗） ================= */
@@ -447,10 +533,11 @@ function openConfirm(p, edit){
   $("c-head").textContent = edit ? "✏️ 修改待辦" : "聽到了 👂 請確認";
   $("f-save").textContent = edit ? "✓ 儲存修改" : "✓ 加入待辦";
   $("heard-text").style.display = edit ? "none" : "block";
-  if(!edit) $("heard-text").innerHTML="🎙️ 「"+escapeHtml(p.heard)+"」"+(p.dated?"":"<br><small style='color:#b06a2a'>沒聽到日期，先排在今天，可自行修改</small>");
+  if(!edit) $("heard-text").innerHTML="🎙️ 「"+escapeHtml(p.heard)+"」"+(p.due?"":"<br><small style='color:#b06a2a'>沒聽到日期，會放進「🧺 記得要做」；要排日期可點下方「指定日期」</small>");
   $("f-title").value=p.title;
-  $("f-date").value=p.due;
+  $("f-date").value=p.due||todayIso();
   $("f-time").value=p.time||"";
+  setFMode(p.due?"date":"some");
   $("f-remind").classList.toggle("on",p.remind);
   const cr=$("f-cats"); cr.innerHTML="";
   CATS.forEach(c=>{
@@ -470,6 +557,16 @@ function syncItemsField(){
   else w.style.display="none";
 }
 function escapeHtml(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+let fMode="date";
+function setFMode(m){
+  fMode=m;
+  $("f-mode-some").classList.toggle("sel",m==="some");
+  $("f-mode-date").classList.toggle("sel",m==="date");
+  $("f-date-wrap").style.display = m==="date" ? "flex" : "none";
+  $("f-remind-wrap").style.display = m==="date" ? "block" : "none";
+}
+$("f-mode-some").onclick=()=>setFMode("some");
+$("f-mode-date").onclick=()=>{ if(!$("f-date").value) $("f-date").value=todayIso(); if(fMode!=="date") $("f-remind").classList.add("on"); setFMode("date"); };
 $("f-cancel").onclick=()=>$("confirm-overlay").classList.remove("show");
 $("f-remind").onclick=()=>$("f-remind").classList.toggle("on");
 $("f-save").onclick=()=>{
@@ -477,12 +574,15 @@ $("f-save").onclick=()=>{
   if(!title){ toast("請輸入事項內容"); return; }
   const itemsVisible = $("f-items-wrap").style.display!=="none";
   const names = itemsVisible ? $("f-items").value.split(/[、,，\s]+/).filter(Boolean) : [];
+  const some = fMode==="some";
+  const due = some ? null : ($("f-date").value||todayIso());
+  const time = some ? null : ($("f-time").value||null);
+  const remind = some ? false : $("f-remind").classList.contains("on");
   if(editingTask){
     const t=editingTask;
     t.title=title; t.cat=selCat;
-    t.due=$("f-date").value||todayIso();
-    t.time=$("f-time").value||null;
-    t.remind=$("f-remind").classList.contains("on");
+    t.due=due; t.time=time; t.remind=remind; t.someday=some;
+    if(some) t.recur=null;
     t.items=names.map(n=>{ const old=(t.items||[]).find(i=>i.name===n); return {name:n, done: old?old.done:false}; });
     t.snooze=0;
     toast("✓ 已更新");
@@ -490,13 +590,11 @@ $("f-save").onclick=()=>{
     tasks.push({
       id:Date.now()+""+Math.floor(Math.random()*999),
       title, cat:selCat, items:names.map(n=>({name:n,done:false})),
-      due:$("f-date").value||todayIso(),
-      time:$("f-time").value||null,
-      remind:$("f-remind").classList.contains("on"),
-      recur:pending.recur||null,
+      due, time, remind, someday:some,
+      recur:some?null:(pending.recur||null),
       done:false, createdAt:new Date().toISOString(), snooze:0
     });
-    toast("✓ 已加入待辦");
+    toast(some?"🧺 已放入「記得要做」":"✓ 已加入待辦");
   }
   editingTask=null;
   save(); renderAll();
@@ -504,19 +602,20 @@ $("f-save").onclick=()=>{
 };
 function openEdit(t){
   openConfirm({ heard:"", title:t.title, cat:t.cat, due:t.due, time:t.time,
-    remind:t.remind, items:(t.items||[]).map(i=>i.name), dated:true }, t);
+    remind:t.remind, items:(t.items||[]).map(i=>i.name), dated:!!t.due }, t);
 }
 
 /* ================= AI 智慧解析（失敗自動退回規則解析） ================= */
 function normalizeAI(x,heard){
-  const cat=["buy","sch","baby","oth"].includes(x.cat)?x.cat:"oth";
+  const cat=CATS.some(c=>c.key===x.cat)?x.cat:"oth";
   const recur=(x.recur&&["daily","weekly","monthly"].includes(x.recur.freq))?x.recur:null;
-  return { heard, title:(x.title||heard).trim(), cat,
-    due:/^\d{4}-\d{2}-\d{2}$/.test(x.due||"")?x.due:todayIso(),
-    time:/^([01]\d|2[0-3]):[0-5]\d$/.test(x.time||"")?x.time:null,
+  const time=/^([01]\d|2[0-3]):[0-5]\d$/.test(x.time||"")?x.time:null;
+  let due=/^\d{4}-\d{2}-\d{2}$/.test(x.due||"")?x.due:null;
+  if(!due && (time||recur)) due=todayIso();
+  return { heard, title:(x.title||heard).trim(), cat, due, time:due?time:null,
     remind:!!x.remind,
     items:Array.isArray(x.items)?x.items.filter(i=>typeof i==="string"&&i.trim()).map(i=>i.trim()):[],
-    recur, dated:true };
+    recur, dated:!!due, someday:!due };
 }
 function showParsing(on){
   if(on){ $("livebox").classList.add("show"); $("livebox").querySelector(".lb-hint").textContent="🧠 正在理解內容…"; $("live-text").textContent="請稍候"; }
@@ -544,7 +643,7 @@ function renderMulti(){
   $("m-head").textContent="一次聽到 "+multiList.length+" 件事 👂";
   $("m-list").innerHTML=multiList.map((p,i)=>
     `<div class="mrow"><div style="flex:1;"><b>${escapeHtml(p.title)}</b>
-      <div class="msub">${catOf(p.cat).name}｜${fmtMD(p.due)} ${dayLabel(p.due)}${p.time?" "+p.time:""}${p.remind?"｜🔔提醒":""}${p.recur?"｜🔁":""}</div></div>
+      <div class="msub">${catOf(p.cat).name}｜${p.due?fmtMD(p.due)+" "+dayLabel(p.due)+(p.time?" "+p.time:"")+(p.remind?"｜🔔提醒":"")+(p.recur?"｜🔁":""):"🧺 記得要做"}</div></div>
       <button class="mdel" data-i="${i}">✕</button></div>`).join("");
   [...$("m-list").querySelectorAll(".mdel")].forEach(b=>b.onclick=()=>{
     multiList.splice(+b.dataset.i,1);
@@ -557,7 +656,7 @@ $("m-save").onclick=()=>{
   multiList.forEach((p,i)=>{
     tasks.push({ id:Date.now()+""+i+Math.floor(Math.random()*999),
       title:p.title, cat:p.cat, items:(p.items||[]).map(x=>({name:x,done:false})),
-      due:p.due, time:p.time, remind:p.remind, recur:p.recur||null,
+      due:p.due||null, time:p.due?p.time:null, remind:p.due?p.remind:false, someday:!p.due, recur:p.due?(p.recur||null):null,
       done:false, createdAt:new Date().toISOString(), snooze:0 });
   });
   save(); renderAll();
@@ -644,7 +743,7 @@ function openAction(t){
 }
 $("a-cancel").onclick=()=>$("action-overlay").classList.remove("show");
 $("a-edit").onclick=()=>{ $("action-overlay").classList.remove("show"); if(actTask) openEdit(actTask); };
-$("a-tomorrow").onclick=()=>{ if(actTask){ actTask.due=iso(addDays(new Date(),1)); save(); renderAll(); toast("已延到明天"); } $("action-overlay").classList.remove("show"); };
+$("a-tomorrow").onclick=()=>{ if(actTask){ actTask.due=iso(addDays(new Date(),1)); actTask.someday=false; save(); renderAll(); toast("已延到明天"); } $("action-overlay").classList.remove("show"); };
 $("a-remind").onclick=()=>{ if(actTask){ actTask.remind=!actTask.remind; save(); renderAll(); toast(actTask.remind?"已開啟提醒":"已關閉提醒"); } $("action-overlay").classList.remove("show"); };
 $("a-delete").onclick=()=>{ if(actTask){ tasks=tasks.filter(x=>x.id!==actTask.id); save(); renderAll(); toast("已刪除"); } $("action-overlay").classList.remove("show"); };
 function toggleDone(t){
@@ -671,6 +770,7 @@ function toggleItem(t,idx){
 /* ================= 卡片繪製 ================= */
 function badgeDue(t){
   const td=todayIso();
+  if(!t.due) return "🧺 記得要做";
   let s = t.due===td ? "今日" : t.due===iso(addDays(new Date(),1)) ? "明天" : fmtMD(t.due)+" "+dayLabel(t.due);
   if(t.time) s+=" "+t.time;
   return s;
@@ -678,7 +778,7 @@ function badgeDue(t){
 function cardHtml(t,opt){
   opt=opt||{};
   const c=catOf(t.cat);
-  const od = !t.done && t.due<todayIso();
+  const od = !t.done && !!t.due && t.due<todayIso();
   const cls = "card"+(od&&!opt.noRed?" overdue":"")+(t.done?" donecard":"");
   let h=`<div class="${cls}" data-id="${t.id}">
     <div class="card-top">
@@ -731,7 +831,7 @@ function renderToday(){
   const td=todayIso();
   const list=$("today-list");
   const vis=t=>filterCat==="all"||t.cat===filterCat;
-  const overdue=tasks.filter(t=>!t.done&&t.due<td&&vis(t)).sort((a,b)=>a.due<b.due?-1:1);
+  const overdue=tasks.filter(t=>!t.done&&t.due&&t.due<td&&vis(t)).sort((a,b)=>a.due<b.due?-1:1);
   const today=tasks.filter(t=>!t.done&&t.due===td&&vis(t)).sort((a,b)=>(a.time||"99")<(b.time||"99")?-1:1);
   const doneToday=tasks.filter(t=>t.done&&(t.due===td||(t.completedAt||"").slice(0,10)===td)&&vis(t));
   let h="";
@@ -763,7 +863,7 @@ function renderCal(){
   });
   /* agenda */
   const ag=$("cal-agenda"); let h="";
-  const overdue=tasks.filter(t=>!t.done&&t.due<td).sort((a,b)=>a.due<b.due?-1:1);
+  const overdue=tasks.filter(t=>!t.done&&t.due&&t.due<td).sort((a,b)=>a.due<b.due?-1:1);
   if(overdue.length){
     h+=`<div class="pinbox"><div class="pt">⚠️ 逾期未完成（會一直顯示在最上方）</div>${overdue.map(t=>cardHtml(t,{noRed:true})).join("")}</div>`;
   }
@@ -787,7 +887,7 @@ function renderCal(){
   });
   flushEmpty();
   /* 更遠的計畫（14 天以後） */
-  const far=tasks.filter(t=>t.due>days[13]&&!t.done)
+  const far=tasks.filter(t=>t.due&&t.due>days[13]&&!t.done)
     .sort((a,b)=>a.due<b.due?-1:a.due>b.due?1:((a.time||"99")<(b.time||"99")?-1:1));
   if(far.length){
     h+=`<div class="dayhead">📆 更遠的計畫 <small>14 天以後・共 ${far.length} 件</small></div>`;
@@ -801,13 +901,155 @@ function showPage(p){
   $("page-today").classList.toggle("show",p==="today");
   $("page-cal").classList.toggle("show",p==="cal");
   $("page-hist").classList.toggle("show",p==="hist");
+  $("page-some").classList.toggle("show",p==="some");
   $("tab-today").classList.toggle("active",p==="today");
   $("tab-cal").classList.toggle("active",p==="cal");
   $("tab-hist").classList.toggle("active",p==="hist");
+  $("tab-some").classList.toggle("active",p==="some");
   window.scrollTo(0,0);
 }
 $("tab-today").onclick=()=>showPage("today");
 $("tab-cal").onclick=()=>{ renderCal(); showPage("cal"); };
+$("tab-some").onclick=()=>{ renderSome(); showPage("some"); };
+
+/* ================= 記得要做（不限日期） ================= */
+let someCat="all";
+const somedayList=()=>tasks.filter(t=>!t.done&&!t.due);
+function ageDays(t){
+  const c=(t.createdAt||"").slice(0,10);
+  if(!c) return 0;
+  return Math.max(0,Math.round((new Date(todayIso()+"T00:00:00")-new Date(c+"T00:00:00"))/86400000));
+}
+function ageText(d){
+  if(d<=0) return {txt:"今天加入",warn:false};
+  if(d<14) return {txt:"放了 "+d+" 天",warn:false};
+  if(d<30) return {txt:"放了 "+Math.round(d/7)+" 週",warn:false};
+  return {txt:"⏳ 已放 "+Math.floor(d/7)+" 週",warn:true};
+}
+function updateSomeBadge(){ const n=somedayList().length; $("some-badge").textContent=n?String(n):""; }
+function renderSome(){
+  const all=somedayList();
+  $("some-title").textContent = all.length ? `記得要做 🧺（${all.length}）` : "記得要做 🧺";
+  $("some-review").innerHTML = all.length
+    ? `<button class="some-rev" id="some-rev-btn"><span class="ic2">🗓️</span><div><div class="t1">本週整理</div><div class="t2">${all.length} 件事，花 1 分鐘看一下</div></div><span class="go">開始 →</span></button>`
+    : "";
+  if(all.length) $("some-rev-btn").onclick=()=>startReview();
+  /* 分類篩選 */
+  const wrap=$("some-chips"); wrap.innerHTML="";
+  if(all.length){
+    [{key:"all",name:"全部"},...CATS].forEach(c=>{
+      const b=document.createElement("button");
+      b.className="chip"+(someCat===c.key?" active":""); b.textContent=c.name;
+      b.onclick=()=>{ someCat=c.key; renderSome(); };
+      wrap.appendChild(b);
+    });
+  }
+  const body=$("some-body");
+  if(!all.length){
+    body.innerHTML='<div class="empty-state">目前沒有「記得要做」的事 🌿<br>說話時不講日期，例如<br>「要記得帶壯壯去剪頭髮」<br>就會放到這裡，每週一早上提醒你整理一次</div>';
+    return;
+  }
+  let h="";
+  CATS.filter(c=>someCat==="all"||someCat===c.key).forEach(c=>{
+    const list=all.filter(t=>t.cat===c.key).sort((a,b)=>ageDays(b)-ageDays(a));
+    if(!list.length) return;
+    h+=`<div class="sgrp"><span>${c.name}</span><span>${list.length}</span></div><div class="slist">`;
+    list.forEach(t=>{
+      const a=ageText(ageDays(t)), n=(t.items||[]).length;
+      h+=`<div class="scard${a.warn?" old":""}" data-id="${t.id}">
+        <div class="card-top">
+          <button class="checkbox" data-act="done"></button>
+          <div class="card-title" data-act="edit">${escapeHtml(t.title)}</div>
+        </div>
+        <div class="smeta">${n?`<span class="sitems">${n} 項</span>`:""}<span class="sage${a.warn?" warn":""}">${a.txt}</span><button class="ssched" data-act="sched">📆 排日期</button></div>
+      </div>`;
+    });
+    h+="</div>";
+  });
+  if(!h) h='<div class="empty-state">這個分類目前沒有事項</div>';
+  body.innerHTML=h;
+  body.querySelectorAll(".scard").forEach(el=>{
+    const t=tasks.find(x=>x.id===el.dataset.id); if(!t) return;
+    el.querySelector('[data-act="done"]').onclick=()=>toggleDone(t);
+    el.querySelector('[data-act="edit"]').onclick=()=>openEdit(t);
+    el.querySelector('[data-act="sched"]').onclick=()=>openSched(t);
+  });
+}
+
+/* ---------- 排日期 ---------- */
+let schedTask=null, schedCb=null, schedPick=null;
+function nextWeekday(wd){ const d=new Date(); const diff=(wd-d.getDay()+7)%7; return iso(addDays(d,diff)); }
+function openSched(t,cb){
+  schedTask=t; schedCb=cb||null; schedPick=null;
+  $("s-head").textContent="「"+t.title+"」排在哪天？";
+  const opts=[["今天",todayIso()],["明天",iso(addDays(new Date(),1))]];
+  const sat=nextWeekday(6), sun=nextWeekday(0);
+  if(!opts.some(o=>o[1]===sat)) opts.push(["週六 "+fmtMD(sat),sat]);
+  if(!opts.some(o=>o[1]===sun)) opts.push(["週日 "+fmtMD(sun),sun]);
+  const q=$("s-quick"); q.innerHTML="";
+  opts.forEach(([lab,d])=>{
+    const b=document.createElement("button"); b.className="catopt"; b.textContent=lab;
+    b.onclick=()=>{ schedPick=d; $("s-date").value=d; [...q.children].forEach(x=>x.classList.remove("sel")); b.classList.add("sel"); };
+    q.appendChild(b);
+  });
+  $("s-date").value=""; $("s-time").value="";
+  $("sched-overlay").classList.add("show");
+}
+$("s-date").addEventListener("change",()=>{ schedPick=$("s-date").value||null; [...$("s-quick").children].forEach(x=>x.classList.toggle("sel",false)); });
+$("s-cancel").onclick=()=>{ $("sched-overlay").classList.remove("show"); const cb=schedCb; schedCb=null; if(cb) cb(false); };
+$("s-ok").onclick=()=>{
+  const d=schedPick||$("s-date").value;
+  if(!d){ toast("請先選一個日期"); return; }
+  const t=schedTask;
+  t.due=d; t.time=$("s-time").value||null; t.someday=false; t.remind=true; t.snooze=0;
+  save(); renderAll();
+  $("sched-overlay").classList.remove("show");
+  toast("📆 已排到 "+fmtMD(d)+"（"+dayLabel(d)+"），到時會提醒");
+  const cb=schedCb; schedCb=null; if(cb) cb(true);
+};
+
+/* ---------- 每週整理 ---------- */
+let revQueue=[], revIdx=0, revStat={plan:0,keep:0,del:0};
+function startReview(){
+  revQueue=somedayList().sort((a,b)=>ageDays(b)-ageDays(a)).map(t=>t.id);
+  if(!revQueue.length){ toast("「記得要做」目前是空的 🌿"); return; }
+  revIdx=0; revStat={plan:0,keep:0,del:0};
+  try{ localStorage.setItem("memoLastReview",todayIso()); }catch(e){}
+  $("rev-overlay").classList.add("show");
+  renderReview();
+}
+function renderReview(){
+  const total=revQueue.length;
+  $("rev-barfill").style.width=Math.round(revIdx/total*100)+"%";
+  const body=$("rev-body");
+  if(revIdx>=total){
+    $("rev-prog").textContent="每週整理";
+    body.innerHTML=`<div class="rev-done"><div class="big">🎉</div><h3>整理完成！</h3>
+      <p>排進行事曆 ${revStat.plan} 件・先留著 ${revStat.keep} 件・刪除 ${revStat.del} 件<br>下週一再提醒你看一次</p></div>
+      <div class="rev-acts"><button class="ra ra1" id="rev-finish">完成</button></div>`;
+    $("rev-finish").onclick=closeReview;
+    return;
+  }
+  const t=tasks.find(x=>x.id===revQueue[revIdx]);
+  if(!t||t.done||t.due){ revIdx++; renderReview(); return; }
+  const c=catOf(t.cat), a=ageText(ageDays(t)), n=(t.items||[]).length;
+  $("rev-prog").textContent=`每週整理　${revIdx+1} / ${total}`;
+  body.innerHTML=`<div class="rev-card">
+      <span class="rc-cat" style="background:${c.bg};color:${c.fg};">${c.name}</span>
+      <div class="rc-t">${escapeHtml(t.title)}</div>
+      <div class="rc-a${a.warn?" warn":""}">${a.txt}${n?"・"+n+" 項":""}</div>
+    </div>
+    <div class="rev-acts">
+      <button class="ra ra1" id="rev-plan">👍 這週做</button>
+      <button class="ra ra2" id="rev-keep">先留著，下週再看</button>
+      <button class="ra ra3" id="rev-del">🗑️ 不需要了</button>
+    </div>`;
+  $("rev-plan").onclick=()=>openSched(t,ok=>{ if(ok){ revStat.plan++; revIdx++; renderReview(); } });
+  $("rev-keep").onclick=()=>{ revStat.keep++; revIdx++; renderReview(); };
+  $("rev-del").onclick=()=>{ tasks=tasks.filter(x=>x.id!==t.id); save(); renderAll(); revStat.del++; revIdx++; renderReview(); };
+}
+function closeReview(){ $("rev-overlay").classList.remove("show"); renderAll(); }
+$("rev-close").onclick=closeReview;
 $("tab-hist").onclick=()=>{ renderHist(); showPage("hist"); };
 
 /* ================= 紀錄查詢頁 ================= */
@@ -911,7 +1153,7 @@ async function fetchInbox(){
 /* ================= 提醒 ================= */
 let lastBannerKey="";
 function dueForRemind(t){
-  if(t.done||!t.remind) return false;
+  if(t.done||!t.remind||!t.due) return false;
   if(t.snooze && Date.now()<t.snooze) return false;
   const td=todayIso();
   if(t.due<td) return true;
@@ -923,6 +1165,7 @@ function dueForRemind(t){
   return false;
 }
 function checkReminders(force){
+  if($("rev-overlay").classList.contains("show")) return; /* 整理中先不打擾 */
   const list=tasks.filter(dueForRemind);
   if(!list.length){ $("banner").classList.remove("show"); return; }
   const key=list.map(t=>t.id).join(",");
@@ -966,7 +1209,7 @@ let syncTimer=null;
 function scheduleSync(){ clearTimeout(syncTimer); syncTimer=setTimeout(syncToServer,1500); }
 function syncToServer(){
   try{
-    const payload=tasks.map(t=>({id:t.id,title:t.title,due:t.due,time:t.time,remind:!!t.remind,done:!!t.done,snooze:t.snooze||0}));
+    const payload=tasks.filter(t=>!t.done||((t.completedAt||"")>iso(addDays(new Date(),-7)))).map(t=>({id:t.id,title:t.title,cat:t.cat,due:t.due||null,time:t.time,remind:!!t.remind,done:!!t.done,someday:!t.due,createdAt:t.createdAt||"",snooze:t.snooze||0}));
     fetch(PUSH_SERVER+"/sync",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({device:deviceId(),tasks:payload})}).catch(()=>{});
   }catch(e){}
 }
@@ -1014,7 +1257,7 @@ $("notif-btn").onclick=async()=>{
 };
 
 /* ================= 啟動 ================= */
-function renderAll(){ renderToday(); if($("page-cal").classList.contains("show")) renderCal(); if($("page-hist").classList.contains("show")) renderHist(); checkReminders(); }
+function renderAll(){ renderToday(); if($("page-cal").classList.contains("show")) renderCal(); if($("page-hist").classList.contains("show")) renderHist(); if($("page-some").classList.contains("show")) renderSome(); updateSomeBadge(); checkReminders(); }
 (function init(){
   const n=new Date();
   $("today-date").textContent=`${n.getMonth()+1}月${n.getDate()}日 星期${WEEK[n.getDay()]}`;
@@ -1023,10 +1266,15 @@ function renderAll(){ renderToday(); if($("page-cal").classList.contains("show")
   setInterval(fetchInbox,120000);
   /* Siri 捷徑帶入的語音文字：?text=... 自動解析 */
   try{
-    const vt=new URLSearchParams(location.search).get("text");
+    const qs=new URLSearchParams(location.search);
+    const vt=qs.get("text");
     if(vt && vt.trim()){
       history.replaceState(null,"",location.pathname);
       setTimeout(()=>smartParse(vt.trim()),400);
+    }else if(qs.get("review")){
+      /* 每週一推播點進來 → 直接開始整理 */
+      history.replaceState(null,"",location.pathname);
+      setTimeout(()=>{ renderSome(); showPage("some"); if(somedayList().length) startReview(); },500);
     }
   }catch(e){}
   setTimeout(()=>checkReminders(true),800);
