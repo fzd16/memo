@@ -196,6 +196,53 @@
   .rev-done .big { font-size:46px; }
   .rev-done h3 { font-size:20px; margin:10px 0 8px; }
   .rev-done p { font-size:14.5px; color:#6b6b6b; line-height:1.8; }
+  /* ===== 壯壯零用錢 ===== */
+  .money-strip { margin:12px 14px 2px; background:#fff; border:1px solid #eee7dc; border-left:4px solid #3E9C6C; border-radius:14px; padding:11px 13px; display:flex; align-items:center; gap:10px; width:calc(100% - 28px); text-align:left; }
+  .money-strip .ms-l { flex:1; min-width:0; }
+  .money-strip .ms-t { font-size:12.5px; color:#9a938a; font-weight:700; }
+  .money-strip .ms-v { font-size:19px; font-weight:800; margin-top:1px; }
+  .money-strip .ms-v small { font-size:12.5px; color:#9a938a; font-weight:600; margin-left:6px; }
+  .money-strip .ms-add { background:#EAF3EC; color:#2F7A4F; font-size:13px; font-weight:800; padding:9px 13px; border-radius:11px; white-space:nowrap; }
+  .backbtn { position:absolute; right:16px; top:calc(20px + env(safe-area-inset-top)); background:#fff; border:1px solid #e2ddd4; border-radius:18px; font-size:13px; font-weight:700; padding:8px 12px; color:#5a5a5a; }
+  .bal { margin:14px; background:#2B2B2B; color:#fff; border-radius:20px; padding:20px 18px; }
+  .bal .b1 { font-size:13px; color:#cfc8bc; font-weight:700; }
+  .bal .b2 { font-size:40px; font-weight:800; letter-spacing:-1px; margin:2px 0 10px; }
+  .bal .b2 span { font-size:22px; margin-right:3px; }
+  .barw { height:8px; background:#4a4a4a; border-radius:4px; overflow:hidden; }
+  .barw i { display:block; height:100%; background:#5FBF8C; border-radius:4px; transition:width .3s; }
+  .bal .b3 { font-size:12.5px; color:#cfc8bc; margin-top:8px; display:flex; justify-content:space-between; }
+  .bal .sync { font-size:11.5px; color:#8f8a80; margin-top:11px; display:flex; align-items:center; gap:5px; }
+  .dotg { width:7px; height:7px; border-radius:50%; background:#5FBF8C; display:inline-block; flex-shrink:0; }
+  .dotg.off { background:#C9A227; }
+  .addbtn { margin:0 14px; background:#3E9C6C; color:#fff; border-radius:15px; padding:15px; text-align:center; font-size:16.5px; font-weight:800; width:calc(100% - 28px); }
+  .mhead { margin:22px 18px 8px; display:flex; justify-content:space-between; align-items:baseline; }
+  .mhead .mh1 { font-size:15px; font-weight:800; }
+  .mhead .mh2 { font-size:12.5px; color:#9a938a; font-weight:700; }
+  .msum { margin:0 14px 8px; background:#F3EFE8; border-radius:12px; padding:9px 12px; font-size:12.5px; color:#7a7263; line-height:1.7; }
+  .msum b { color:#2F7A4F; }
+  .rows { padding:0 14px; display:flex; flex-direction:column; gap:7px; }
+  .erow { background:#fff; border:1px solid #eee7dc; border-radius:13px; padding:11px 13px; display:flex; align-items:center; gap:10px; width:100%; text-align:left; }
+  .erow .ed { font-size:12px; color:#9a938a; font-weight:700; width:36px; flex-shrink:0; }
+  .erow .ei { flex:1; font-size:15px; font-weight:600; min-width:0; word-break:break-all; }
+  .erow .ei small { display:block; font-size:11.5px; color:#b5aea3; font-weight:600; margin-top:2px; }
+  .erow .ea { font-size:15.5px; font-weight:800; color:#C4452F; flex-shrink:0; }
+  .erow.inrow { background:#EAF3EC; border-color:#cfe6d8; }
+  .erow.inrow .ea { color:#2F7A4F; }
+  .inp { width:100%; font-size:16px; padding:12px 13px; border-radius:12px; border:1px solid #ddd6ca; background:#fff; font-family:inherit; color:#2B2B2B; -webkit-appearance:none; }
+  .inp.big { font-size:26px; font-weight:800; }
+  .quickamt { display:flex; gap:6px; flex-wrap:wrap; margin-top:7px; }
+  .after { background:#EAF3EC; border-radius:12px; padding:11px 13px; font-size:14px; color:#2F7A4F; font-weight:700; text-align:center; margin-bottom:14px; }
+  .after.bad { background:#FDEBE9; color:#C4452F; }
+  .after small { display:block; font-weight:600; font-size:12.5px; margin-top:3px; opacity:.85; }
+  .btn.money { background:#3E9C6C; color:#fff; }
+  .btn.money.off { background:#ddd6ca; color:#fff; }
+  .code { background:#2B2B2B; color:#fff; border-radius:16px; padding:18px; text-align:center; margin-bottom:14px; width:100%; }
+  .code .c1 { font-size:12.5px; color:#cfc8bc; font-weight:700; }
+  .code .c2 { font-size:27px; font-weight:800; letter-spacing:3px; margin:7px 0 4px; font-family:ui-monospace,monospace; }
+  .code .c3 { font-size:12px; color:#8f8a80; }
+  .who { background:#fff; border:1px solid #eee7dc; border-radius:13px; padding:12px 13px; display:flex; align-items:center; gap:10px; margin-bottom:8px; font-size:14.5px; }
+  .who .av { width:30px; height:30px; border-radius:50%; background:#EAF0FA; color:#3A62A8; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:800; flex-shrink:0; }
+  .who .tag { margin-left:auto; font-size:11.5px; color:#9a938a; font-weight:700; }
   .siri-box .sb-url { display:block; width:100%; margin-top:8px; background:#fff; border:1px dashed #cfc8bc; border-radius:10px; padding:9px 11px; font-size:11.5px; color:#5a5a5a; word-break:break-all; text-align:left; font-family:monospace; }
 </style>
 </head>
@@ -208,8 +255,38 @@
     <h1 id="today-title">今天要做的事 ☀️</h1>
     <button class="bellbtn" id="notif-btn" style="display:none;">🔔 開啟通知</button>
   </div>
+  <button class="money-strip" id="money-strip" style="display:none;">
+    <div class="ms-l">
+      <div class="ms-t">💰 壯壯零用錢</div>
+      <div class="ms-v" id="ms-v"></div>
+    </div>
+    <span class="ms-add" id="ms-add">＋ 記一筆</span>
+  </button>
   <div class="chips" id="cat-chips"></div>
   <div class="tasks" id="today-list"></div>
+</div>
+
+<!-- ===================== 零用錢頁 ===================== -->
+<div class="page" id="page-money">
+  <div class="app-header">
+    <div class="date" id="money-sub">壯壯的零用錢帳本</div>
+    <h1>壯壯零用錢 💰</h1>
+    <button class="backbtn" id="money-back">✕ 關閉</button>
+  </div>
+  <div class="bal">
+    <div class="b1">目前可用</div>
+    <div class="b2" id="bal-v"><span>$</span>0</div>
+    <div class="barw"><i id="bal-bar" style="width:0"></i></div>
+    <div class="b3"><span id="bal-used"></span><span id="bal-quota"></span></div>
+    <button class="sync" id="bal-sync"><span class="dotg"></span><span id="bal-sync-t">同步中…</span></button>
+  </div>
+  <button class="addbtn" id="money-add">＋ 記一筆消費</button>
+  <div id="money-list"></div>
+  <div class="siri-box" style="margin-top:22px;">
+    <div class="sb-t">🔗 兩支手機共用這本帳</div>
+    <div class="sb-hint">另一支手機在零用錢頁點「共用設定」，輸入同一組代碼即可。</div>
+    <button class="sb-url" id="money-share">共用設定 →</button>
+  </div>
 </div>
 
 <!-- ===================== 行事曆頁 ===================== -->
@@ -376,6 +453,46 @@
     <div class="actions">
       <button class="ract go" id="bn-go">去查看</button>
       <button class="ract" id="bn-snooze">1 小時後再提醒</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== 記一筆消費 ===================== -->
+<div class="overlay" id="ent-overlay" style="z-index:58;">
+  <div class="sheet">
+    <h2 id="ent-head">💰 記一筆消費</h2>
+    <div class="field">
+      <label>金額</label>
+      <input class="inp big" type="number" inputmode="numeric" id="ent-amt" placeholder="0">
+      <div class="quickamt" id="ent-quick"></div>
+    </div>
+    <div class="field"><label>買了什麼</label><input class="inp" type="text" id="ent-item" placeholder="例如：航海王漫畫"></div>
+    <div class="field"><label>日期</label><input class="inp" type="date" id="ent-date"></div>
+    <div class="after" id="ent-after"></div>
+    <div class="btnrow">
+      <button class="btn ghost" id="ent-cancel">取消</button>
+      <button class="btn money" id="ent-save">✓ 記下來</button>
+    </div>
+    <div class="btnrow" id="ent-delrow" style="display:none;">
+      <button class="btn danger" id="ent-del" style="flex:1;">🗑️ 刪除這筆</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== 共用設定 ===================== -->
+<div class="overlay" id="share-overlay" style="z-index:58;">
+  <div class="sheet">
+    <h2>🔗 共用設定</h2>
+    <button class="code" id="share-code">
+      <div class="c1">這本帳的代碼</div>
+      <div class="c2" id="share-code-v">—</div>
+      <div class="c3">點一下複製，傳給另一支手機輸入</div>
+    </button>
+    <div class="field"><label>目前共用的裝置</label><div id="share-members"></div></div>
+    <div class="field"><label>我在帳本裡顯示的名稱</label><input class="inp" type="text" id="share-name" placeholder="例如：媽媽" maxlength="10"></div>
+    <div class="btnrow">
+      <button class="btn ghost" id="share-join">加入別本帳</button>
+      <button class="btn primary" id="share-ok">完成</button>
     </div>
   </div>
 </div>
@@ -631,9 +748,48 @@ async function smartParse(text){
     const j=await r.json();
     if(!j.tasks||!j.tasks.length) throw 0;
     showParsing(false);
-    const list=j.tasks.map(x=>normalizeAI(x,text));
+    /* 零用錢消費單獨處理 */
+    const al=j.tasks.find(x=>x.kind==="allowance"&&Number(x.amount)>0);
+    if(al){
+      openEntry(null,{amount:Math.round(Number(al.amount)),item:(al.title||"").trim()});
+      if(/^\d{4}-\d{2}-\d{2}$/.test(al.date||"")) $("ent-date").value=al.date;
+      entAfter();
+      const rest=j.tasks.filter(x=>x!==al&&x.kind!=="allowance").map(x=>normalizeAI(x,text));
+      if(rest.length) setTimeout(()=>{ rest.length===1?openConfirm(rest[0]):openMulti(rest); },300);
+      return;
+    }
+    const list=j.tasks.filter(x=>x.kind!=="allowance").map(x=>normalizeAI(x,text));
+    if(!list.length) throw 0;
     if(list.length===1) openConfirm(list[0]); else openMulti(list);
-  }catch(e){ showParsing(false); openConfirm(parseInput(text)); }
+  }catch(e){
+    showParsing(false);
+    const al=parseAllowance(text);
+    if(al) openEntry(null,al); else openConfirm(parseInput(text));
+  }
+}
+/* 規則版零用錢辨識（AI 連不上時的備用） */
+function parseAllowance(raw){
+  const s=raw.replace(/[。！!？?～~\s]/g,"");
+  if(!/壯壯|零用錢/.test(s)) return null;
+  if(!/(買|花|付|用了|用掉)/.test(s)) return null;
+  const m=s.match(/([0-9]{1,6}|[一二兩三四五六七八九十百千]{1,6})\s*(元|塊|圓)/);
+  if(!m) return null;
+  let amt=/^\d+$/.test(m[1])?+m[1]:zhNum(m[1]);
+  if(m[1]==="一百") amt=100;
+  else if(!/^\d+$/.test(m[1])){
+    const t=m[1].match(/^([一二兩三四五六七八九])?百([一二三四五六七八九十]{0,3})?$/);
+    if(t) amt=(t[1]?zhNum(t[1]):1)*100+(t[2]?(zhNum(t[2])||0):0);
+    const q=m[1].match(/^([一二兩三四五六七八九])?千([一二三四五六七八九百]{0,4})?$/);
+    if(q) amt=(q[1]?zhNum(q[1]):1)*1000;
+  }
+  if(!amt||amt<=0) return null;
+  let rest=s.replace(/壯壯|零用錢|要記得|記得|幫我|今天|自己的/g,"").replace(m[0],"");
+  let item;
+  const mb=rest.match(/買(.+)$/);
+  if(mb) item=mb[1];
+  else item=rest.replace(/^(買|花了|花|付了|付|用了|用掉|用)/,"").replace(/(買|花了|花|付了|付|用)$/,"");
+  item=item.replace(/^[的了用，,、]+|[的了，,、]+$/g,"").trim();
+  return { amount:amt, item:item||"消費" };
 }
 
 /* ================= 多筆待辦確認 ================= */
@@ -902,6 +1058,7 @@ function showPage(p){
   $("page-cal").classList.toggle("show",p==="cal");
   $("page-hist").classList.toggle("show",p==="hist");
   $("page-some").classList.toggle("show",p==="some");
+  $("page-money").classList.toggle("show",p==="money");
   $("tab-today").classList.toggle("active",p==="today");
   $("tab-cal").classList.toggle("active",p==="cal");
   $("tab-hist").classList.toggle("active",p==="hist");
@@ -1137,7 +1294,20 @@ async function fetchInbox(){
     const r=await fetch(PUSH_SERVER+"/inbox?device="+deviceId());
     if(!r.ok) throw 0;
     const j=await r.json();
-    const items=(j.items||[]).filter(it=>it&&it.id&&!tasks.some(t=>t.id===it.id));
+    const incoming=(j.items||[]).filter(it=>it&&it.id);
+    /* Siri 記的零用錢 */
+    const als=incoming.filter(it=>it.allowance&&it.amount>0&&!entries.some(e=>e.id===it.id));
+    if(als.length&&bookCode&&moneyStarted()){
+      let added=0;
+      als.forEach(it=>{
+        if(it.amount>balance()){ toast("⚠️ Siri 記的「"+it.title+"」金額超過餘額，未記入"); return; }
+        const e={ id:it.id, date:/^\d{4}-\d{2}-\d{2}$/.test(it.date||"")?it.date:todayIso(),
+          item:it.title||"", amount:Math.round(it.amount), by:deviceId(), byName:myName||"", ts:Date.now(), deleted:false };
+        entries.unshift(e); pendAdd.push(e); added++;
+      });
+      if(added){ saveMoney(); syncBook(true); toast("💰 已從 Siri 記入 "+added+" 筆零用錢"); }
+    }
+    const items=incoming.filter(it=>!it.allowance&&!tasks.some(t=>t.id===it.id));
     if(items.length){
       items.forEach(it=>tasks.push(it));
       save(); renderAll();
@@ -1165,7 +1335,8 @@ function dueForRemind(t){
   return false;
 }
 function checkReminders(force){
-  if($("rev-overlay").classList.contains("show")) return; /* 整理中先不打擾 */
+  /* 整理中、記帳中先不打擾 */
+  if($("rev-overlay").classList.contains("show")||$("ent-overlay").classList.contains("show")||$("share-overlay").classList.contains("show")) return;
   const list=tasks.filter(dueForRemind);
   if(!list.length){ $("banner").classList.remove("show"); return; }
   const key=list.map(t=>t.id).join(",");
@@ -1257,13 +1428,270 @@ $("notif-btn").onclick=async()=>{
 };
 
 /* ================= 啟動 ================= */
-function renderAll(){ renderToday(); if($("page-cal").classList.contains("show")) renderCal(); if($("page-hist").classList.contains("show")) renderHist(); if($("page-some").classList.contains("show")) renderSome(); updateSomeBadge(); checkReminders(); }
+function renderAll(){ renderToday(); if($("page-cal").classList.contains("show")) renderCal(); if($("page-hist").classList.contains("show")) renderHist(); if($("page-some").classList.contains("show")) renderSome(); if($("page-money").classList.contains("show")) renderMoney(); updateSomeBadge(); renderMoneyStrip(); checkReminders(); }
+/* ================= 壯壯零用錢（雲端共用帳本） ================= */
+const MONEY_START="2026-11";   /* 第一個月 */
+const MONEY_PER_MONTH=1000;    /* 每月入帳 */
+const QUICK_AMTS=[50,100,150,200,500];
+
+const mstore={
+  get(k,d){ try{ const v=localStorage.getItem(k); return v===null?d:JSON.parse(v); }catch(e){ return (memStore[k]!==undefined?memStore[k]:d); } },
+  set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){ memStore[k]=v; } }
+};
+let bookCode = mstore.get("memoBook",null);
+let myName   = mstore.get("memoName","");
+let entries  = mstore.get("memoEntries",[]);   /* [{id,date,item,amount,by,byName,ts,deleted}] */
+let pendAdd  = mstore.get("memoPendAdd",[]);   /* 尚未確認同步的新增 */
+let pendDel  = mstore.get("memoPendDel",[]);   /* 尚未確認同步的刪除 */
+let members  = mstore.get("memoMembers",{});
+let lastSync = 0, syncing=false;
+const saveMoney=()=>{ mstore.set("memoEntries",entries); mstore.set("memoPendAdd",pendAdd); mstore.set("memoPendDel",pendDel); };
+
+function newBookCode(){
+  const cs="ACDEFGHJKLMNPQRTUVWXY3479";
+  let s=""; for(let i=0;i<4;i++) s+=cs[Math.floor(Math.random()*cs.length)];
+  return "ZZ-"+s;
+}
+function monthsSinceStart(){
+  const n=new Date(), [sy,sm]=MONEY_START.split("-").map(Number);
+  return Math.max(0,(n.getFullYear()-sy)*12+(n.getMonth()+1-sm)+1);
+}
+const activeEntries=()=>entries.filter(e=>!e.deleted);
+const moneyStarted=()=>monthsSinceStart()>0;
+function totalCredit(){ return monthsSinceStart()*MONEY_PER_MONTH; }
+function totalSpent(){ return activeEntries().reduce((s,e)=>s+e.amount,0); }
+function balance(){ return totalCredit()-totalSpent(); }
+function curMonth(){ const n=new Date(); return n.getFullYear()+"-"+pad(n.getMonth()+1); }
+function spentInMonth(m){ return activeEntries().filter(e=>e.date.slice(0,7)===m).reduce((s,e)=>s+e.amount,0); }
+const money=n=>"$"+Number(n).toLocaleString("en-US");
+
+/* ---------- 同步 ---------- */
+async function syncBook(push){
+  if(!bookCode||syncing) return;
+  syncing=true;
+  try{
+    let r;
+    if(push||pendAdd.length||pendDel.length){
+      r=await fetch(PUSH_SERVER+"/book",{method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({book:bookCode,add:pendAdd,del:pendDel,member:{id:deviceId(),name:myName||"我"}})});
+    }else{
+      r=await fetch(PUSH_SERVER+"/book?book="+encodeURIComponent(bookCode));
+    }
+    if(!r.ok) throw 0;
+    const j=await r.json();
+    if(Array.isArray(j.entries)){
+      entries=j.entries;
+      /* 伺服器已收到的才從待同步清單移除，沒收到的下次再送 */
+      const have=new Set(entries.map(e=>e.id));
+      pendAdd=pendAdd.filter(e=>!have.has(e.id));
+      pendDel=pendDel.filter(id=>!entries.some(e=>e.id===id&&e.deleted));
+      members=j.members||{};
+      mstore.set("memoMembers",members);
+      saveMoney();
+      lastSync=Date.now();
+    }
+  }catch(e){}
+  syncing=false;
+  renderMoneyStrip();
+  if($("page-money").classList.contains("show")) renderMoney();
+}
+function syncLabel(){
+  if(!lastSync) return pendAdd.length||pendDel.length ? "待同步（沒有網路）" : "連線中…";
+  const s=Math.round((Date.now()-lastSync)/1000);
+  const w=pendAdd.length||pendDel.length ? "有 "+(pendAdd.length+pendDel.length)+" 筆待同步・" : "已同步・";
+  return w+(s<60?"剛剛更新":s<3600?Math.floor(s/60)+" 分鐘前":"較久以前");
+}
+
+/* ---------- 今天頁的餘額條 ---------- */
+function renderMoneyStrip(){
+  const el=$("money-strip");
+  el.style.display="flex";
+  if(!bookCode){
+    $("ms-v").innerHTML=`<span style="font-size:15px;color:#9a938a;">還沒設定，點一下開始</span>`;
+    $("ms-add").textContent="設定";
+    return;
+  }
+  $("ms-add").textContent="＋ 記一筆";
+  if(!moneyStarted()){
+    $("ms-v").innerHTML=`<span style="font-size:15px;">${MONEY_START.replace("-","年")}月開始</span> <small>每月 ${money(MONEY_PER_MONTH)}</small>`;
+  }else{
+    const left=MONEY_PER_MONTH-spentInMonth(curMonth());
+    $("ms-v").innerHTML=`${money(balance())} <small>本月還有 ${money(Math.max(0,left))}</small>`;
+  }
+}
+
+/* ---------- 零用錢主畫面 ---------- */
+function renderMoney(){
+  const started=moneyStarted();
+  const bal=balance(), used=spentInMonth(curMonth());
+  $("bal-v").innerHTML=`<span>$</span>${started?Number(bal).toLocaleString("en-US"):"0"}`;
+  $("bal-bar").style.width=started?Math.min(100,Math.round(used/MONEY_PER_MONTH*100))+"%":"0%";
+  $("bal-used").textContent=started?"本月已用 "+money(used):"尚未開始";
+  $("bal-quota").textContent="本月額度 "+money(MONEY_PER_MONTH);
+  $("money-sub").textContent=bookCode?("帳本代碼 "+bookCode):"壯壯的零用錢帳本";
+  $("bal-sync-t").textContent=syncLabel();
+  $("bal-sync").querySelector(".dotg").className="dotg"+((pendAdd.length||pendDel.length||!lastSync)?" off":"");
+  const list=$("money-list");
+  if(!started){
+    list.innerHTML=`<div class="empty-state">零用錢從 ${MONEY_START.split("-")[0]} 年 ${+MONEY_START.split("-")[1]} 月開始 🗓️<br>每月 1 號自動入帳 ${money(MONEY_PER_MONTH)}<br>用不完會累積到下個月</div>`;
+    return;
+  }
+  /* 由起始月往現在累加，再倒著列出 */
+  const [sy,sm]=MONEY_START.split("-").map(Number);
+  const months=[]; let run=0;
+  for(let i=0;i<monthsSinceStart();i++){
+    const d=new Date(sy,sm-1+i,1), m=d.getFullYear()+"-"+pad(d.getMonth()+1);
+    const open=run; run+=MONEY_PER_MONTH;
+    const sp=spentInMonth(m); run-=sp;
+    months.push({m,open,sp,close:run,y:d.getFullYear(),mo:d.getMonth()+1});
+  }
+  let h="";
+  months.reverse().forEach(x=>{
+    const rows=activeEntries().filter(e=>e.date.slice(0,7)===x.m)
+      .sort((a,b)=>a.date<b.date?1:a.date>b.date?-1:b.ts-a.ts);
+    h+=`<div class="mhead"><span class="mh1">${x.y} 年 ${x.mo} 月</span><span class="mh2">結餘 ${money(x.close)}</span></div>`;
+    h+=`<div class="msum">${x.open?`上月結餘 ${money(x.open)}　＋　`:""}本月入帳 <b>${money(MONEY_PER_MONTH)}</b>　－　支出 ${money(x.sp)}${x.sp===0?"　（整月沒花，全部累積）":""}</div>`;
+    h+=`<div class="rows">`;
+    rows.forEach(e=>{
+      h+=`<button class="erow" data-id="${e.id}"><span class="ed">${(+e.date.slice(5,7))}/${e.date.slice(8,10)}</span>
+        <span class="ei">${escapeHtml(e.item||"（未填品項）")}${e.byName?`<small>${escapeHtml(e.byName)}記的</small>`:""}</span>
+        <span class="ea">-${money(e.amount)}</span></button>`;
+    });
+    h+=`<div class="erow inrow"><span class="ed">${x.mo}/1</span><span class="ei">每月零用錢</span><span class="ea">+${money(MONEY_PER_MONTH)}</span></div></div>`;
+  });
+  list.innerHTML=h;
+  list.querySelectorAll(".erow[data-id]").forEach(el=>{
+    el.onclick=()=>openEntry(entries.find(e=>e.id===el.dataset.id));
+  });
+}
+
+/* ---------- 記一筆 ---------- */
+let editEntry=null;
+function openEntry(e,preset){
+  if(!bookCode){ setupBook(); return; }
+  if(!moneyStarted()){ toast("零用錢從 "+MONEY_START.split("-")[1]+" 月才開始喔"); return; }
+  editEntry=e||null;
+  $("ent-head").textContent=e?"✏️ 修改這筆消費":"💰 記一筆消費";
+  $("ent-amt").value=e?e.amount:(preset&&preset.amount?preset.amount:"");
+  $("ent-item").value=e?e.item:(preset&&preset.item?preset.item:"");
+  $("ent-date").value=e?e.date:todayIso();
+  $("ent-delrow").style.display=e?"flex":"none";
+  const q=$("ent-quick"); q.innerHTML="";
+  QUICK_AMTS.forEach(a=>{
+    const b=document.createElement("button"); b.className="catopt"; b.textContent="$"+a;
+    b.onclick=()=>{ $("ent-amt").value=a; entAfter(); };
+    q.appendChild(b);
+  });
+  entAfter();
+  $("ent-overlay").classList.add("show");
+}
+function entAfter(){
+  const amt=Math.round(Number($("ent-amt").value)||0);
+  const avail=balance()+(editEntry?editEntry.amount:0);
+  const box=$("ent-after"), btn=$("ent-save");
+  if(amt<=0){
+    box.className="after"; box.innerHTML=`可用餘額 <b>${money(balance())}</b>`;
+    btn.classList.add("off"); return;
+  }
+  if(amt>avail){
+    box.className="after bad";
+    box.innerHTML=`餘額不足，最多只能用 <b>${money(avail)}</b><small>零用錢不能預支，再存 ${money(amt-avail)} 就夠囉</small>`;
+    btn.classList.add("off"); return;
+  }
+  const left=avail-amt;
+  const mleft=MONEY_PER_MONTH-spentInMonth(curMonth())-amt+(editEntry&&editEntry.date.slice(0,7)===curMonth()?editEntry.amount:0);
+  box.className="after";
+  box.innerHTML=`記錄後還剩 <b>${money(left)}</b><small>本月額度還有 ${money(Math.max(0,mleft))}</small>`;
+  btn.classList.remove("off");
+}
+$("ent-amt").addEventListener("input",entAfter);
+$("ent-cancel").onclick=()=>$("ent-overlay").classList.remove("show");
+$("ent-save").onclick=()=>{
+  const amt=Math.round(Number($("ent-amt").value)||0);
+  const avail=balance()+(editEntry?editEntry.amount:0);
+  if(amt<=0){ toast("請輸入金額"); return; }
+  if(amt>avail){ toast("餘額不足，不能預支"); return; }
+  const date=$("ent-date").value||todayIso();
+  if(date.slice(0,7)<MONEY_START){ toast("日期不能早於 "+MONEY_START.split("-")[1]+" 月"); return; }
+  const item=$("ent-item").value.trim();
+  if(editEntry){
+    /* 修改＝刪舊的、開新的，確保兩支手機合併後一致 */
+    editEntry.deleted=true; pendDel.push(editEntry.id);
+  }
+  const e={ id:deviceId().slice(0,6)+Date.now().toString(36)+Math.floor(Math.random()*999),
+    date, item, amount:amt, by:deviceId(), byName:myName||"", ts:Date.now(), deleted:false };
+  entries.unshift(e); pendAdd.push(e);
+  saveMoney(); renderMoneyStrip(); renderMoney();
+  $("ent-overlay").classList.remove("show");
+  toast(editEntry?"✓ 已更新":"✓ 已記下，還剩 "+money(balance()));
+  editEntry=null;
+  syncBook(true);
+};
+$("ent-del").onclick=()=>{
+  if(!editEntry) return;
+  editEntry.deleted=true; pendDel.push(editEntry.id);
+  saveMoney(); renderMoneyStrip(); renderMoney();
+  $("ent-overlay").classList.remove("show");
+  toast("已刪除，餘額回到 "+money(balance()));
+  editEntry=null;
+  syncBook(true);
+};
+
+/* ---------- 共用設定 ---------- */
+function setupBook(){
+  if(!bookCode){ bookCode=newBookCode(); mstore.set("memoBook",bookCode); }
+  openShare();
+}
+function openShare(){
+  $("share-code-v").textContent=bookCode||"—";
+  $("share-name").value=myName;
+  const me=deviceId();
+  const ms=Object.entries(members||{});
+  $("share-members").innerHTML = ms.length
+    ? ms.map(([id,m])=>{
+        const nm=m.name||"未命名";
+        const ago=m.seen?Math.round((Date.now()-m.seen)/60000):null;
+        return `<div class="who"><span class="av">${escapeHtml(nm.slice(0,1))}</span>${escapeHtml(nm)}<span class="tag">${id===me?"這支手機":(ago===null?"":ago<2?"剛剛同步":ago<60?ago+" 分鐘前":"較久以前")}</span></div>`;
+      }).join("")
+    : `<div class="who"><span class="av">我</span>只有這支手機<span class="tag">等待另一支加入</span></div>`;
+  $("share-overlay").classList.add("show");
+}
+$("share-code").onclick=async()=>{
+  try{ await navigator.clipboard.writeText(bookCode); toast("✓ 已複製代碼 "+bookCode); }
+  catch(e){ toast("請長按代碼手動複製"); }
+};
+$("share-ok").onclick=()=>{
+  myName=$("share-name").value.trim().slice(0,10);
+  mstore.set("memoName",myName);
+  $("share-overlay").classList.remove("show");
+  syncBook(true);
+};
+$("share-join").onclick=()=>{
+  const c=(prompt("輸入另一支手機的帳本代碼（例如 ZZ-4F7K）")||"").trim().toUpperCase();
+  if(!c) return;
+  if(!/^[A-Z0-9-]{4,16}$/.test(c)){ toast("代碼格式不正確"); return; }
+  bookCode=c; mstore.set("memoBook",bookCode);
+  entries=[]; pendAdd=[]; pendDel=[]; saveMoney();
+  lastSync=0;
+  $("share-code-v").textContent=bookCode;
+  toast("已切換到帳本 "+c+"，同步中…");
+  syncBook(true).then(()=>{ openShare(); });
+};
+$("money-share").onclick=openShare;
+$("money-back").onclick=()=>showPage("today");
+$("money-add").onclick=()=>openEntry(null);
+$("bal-sync").onclick=()=>{ toast("重新同步中…"); syncBook(false); };
+$("money-strip").onclick=()=>{ if(!bookCode){ setupBook(); return; } renderMoney(); showPage("money"); syncBook(false); };
+$("ms-add").onclick=ev=>{ ev.stopPropagation(); if(!bookCode){ setupBook(); return; } openEntry(null); };
+
 (function init(){
   const n=new Date();
   $("today-date").textContent=`${n.getMonth()+1}月${n.getDate()}日 星期${WEEK[n.getDay()]}`;
   renderAll();
   registerSW(); updateNotifBtn(); scheduleSync(); initSiriBox(); fetchInbox();
   setInterval(fetchInbox,120000);
+  renderMoneyStrip(); syncBook(false);
+  setInterval(()=>{ if(!document.hidden) syncBook(false); },20000);
   /* Siri 捷徑帶入的語音文字：?text=... 自動解析 */
   try{
     const qs=new URLSearchParams(location.search);
@@ -1279,7 +1707,7 @@ function renderAll(){ renderToday(); if($("page-cal").classList.contains("show")
   }catch(e){}
   setTimeout(()=>checkReminders(true),800);
   setInterval(()=>checkReminders(false),30000);
-  document.addEventListener("visibilitychange",()=>{ if(!document.hidden){ fetchInbox(); renderAll(); checkReminders(true); } });
+  document.addEventListener("visibilitychange",()=>{ if(!document.hidden){ fetchInbox(); renderAll(); syncBook(false); checkReminders(true); } });
 })();
 </script>
 </body>
