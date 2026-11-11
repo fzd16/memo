@@ -215,6 +215,21 @@
   .dotg { width:7px; height:7px; border-radius:50%; background:#5FBF8C; display:inline-block; flex-shrink:0; }
   .dotg.off { background:#C9A227; }
   .addbtn { margin:0 14px; background:#3E9C6C; color:#fff; border-radius:15px; padding:15px; text-align:center; font-size:16.5px; font-weight:800; width:calc(100% - 28px); }
+  .moneybtns { display:flex; gap:0; }
+  .moneybtns .addbtn { flex:1; width:auto; }
+  .moneybtns .addbtn:first-child { margin-right:7px; }
+  .moneybtns .addbtn:last-child { margin-left:7px; }
+  .addbtn.inbtn { background:#2B2B2B; }
+  .rate-row { display:flex; align-items:center; gap:7px; width:calc(100% - 28px); margin:10px 14px 0; background:#fff; border:1px solid #eee7dc; border-radius:13px; padding:11px 13px; font-size:14px; font-weight:600; color:#5a5a5a; text-align:left; }
+  .rate-row b { font-weight:800; color:#2B2B2B; }
+  .rate-row > span { margin-left:auto; font-size:13px; font-weight:800; color:#3E9C6C; }
+  .rate-row .soon { margin-left:7px; font-size:12px; font-weight:700; color:#2F7A4F; background:#EAF3EC; padding:3px 8px; border-radius:10px; }
+  .erow.raterow { background:#F3EFE8; border-color:#e2ddd4; }
+  .erow.raterow .ea { color:#7a7263; font-size:13px; }
+  .dirrow { display:flex; gap:8px; margin-bottom:14px; }
+  .diropt { flex:1; padding:12px; border-radius:13px; border:1.5px solid #ddd6ca; background:#fff; font-size:15.5px; font-weight:800; color:#9a938a; }
+  .diropt.sel#ent-dir-out { background:#C4452F; border-color:#C4452F; color:#fff; }
+  .diropt.sel#ent-dir-in { background:#3E9C6C; border-color:#3E9C6C; color:#fff; }
   .mhead { margin:22px 18px 8px; display:flex; justify-content:space-between; align-items:baseline; }
   .mhead .mh1 { font-size:15px; font-weight:800; }
   .mhead .mh2 { font-size:12.5px; color:#9a938a; font-weight:700; }
@@ -280,7 +295,11 @@
     <div class="b3"><span id="bal-used"></span><span id="bal-quota"></span></div>
     <button class="sync" id="bal-sync"><span class="dotg"></span><span id="bal-sync-t">同步中…</span></button>
   </div>
-  <button class="addbtn" id="money-add">＋ 記一筆消費</button>
+  <div class="moneybtns">
+    <button class="addbtn" id="money-add">－ 記一筆消費</button>
+    <button class="addbtn inbtn" id="money-in">＋ 加錢</button>
+  </div>
+  <button class="rate-row" id="rate-row">🔧 每月零用錢 <b id="rate-now">$1,000</b><span>調整 ›</span></button>
   <div id="money-list"></div>
   <div class="siri-box" style="margin-top:22px;">
     <div class="sb-t">🔗 兩支手機共用這本帳</div>
@@ -461,12 +480,20 @@
 <div class="overlay" id="ent-overlay" style="z-index:58;">
   <div class="sheet">
     <h2 id="ent-head">💰 記一筆消費</h2>
+    <div class="dirrow">
+      <button class="diropt sel" id="ent-dir-out">－ 支出</button>
+      <button class="diropt" id="ent-dir-in">＋ 收入</button>
+    </div>
     <div class="field">
       <label>金額</label>
       <input class="inp big" type="number" inputmode="numeric" id="ent-amt" placeholder="0">
       <div class="quickamt" id="ent-quick"></div>
     </div>
-    <div class="field"><label>買了什麼</label><input class="inp" type="text" id="ent-item" placeholder="例如：航海王漫畫"></div>
+    <div class="field">
+      <label id="ent-item-lab">買了什麼</label>
+      <input class="inp" type="text" id="ent-item" placeholder="例如：航海王漫畫">
+      <div class="quickamt" id="ent-reasons" style="display:none;"></div>
+    </div>
     <div class="field"><label>日期</label><input class="inp" type="date" id="ent-date"></div>
     <div class="after" id="ent-after"></div>
     <div class="btnrow">
@@ -476,6 +503,28 @@
     <div class="btnrow" id="ent-delrow" style="display:none;">
       <button class="btn danger" id="ent-del" style="flex:1;">🗑️ 刪除這筆</button>
     </div>
+  </div>
+</div>
+
+<!-- ===================== 調整每月金額 ===================== -->
+<div class="overlay" id="rate-overlay" style="z-index:58;">
+  <div class="sheet">
+    <h2 id="rate-head">🔧 調整每月零用錢</h2>
+    <div class="heardbox" id="rate-cur"></div>
+    <div class="field">
+      <label>新的每月金額</label>
+      <input class="inp big" type="number" inputmode="numeric" id="rate-amt" placeholder="1000">
+    </div>
+    <div class="field"><label>從哪個月開始</label><input class="inp" type="month" id="rate-from"></div>
+    <div class="after" id="rate-after"></div>
+    <div class="btnrow">
+      <button class="btn ghost" id="rate-cancel">取消</button>
+      <button class="btn money" id="rate-save">✓ 設定</button>
+    </div>
+    <div class="btnrow" id="rate-delrow" style="display:none;">
+      <button class="btn danger" id="rate-del" style="flex:1;">🗑️ 取消這次調整</button>
+    </div>
+    <div id="rate-list"></div>
   </div>
 </div>
 
@@ -751,7 +800,7 @@ async function smartParse(text){
     /* 零用錢消費單獨處理 */
     const al=j.tasks.find(x=>x.kind==="allowance"&&Number(x.amount)>0);
     if(al){
-      openEntry(null,{amount:Math.round(Number(al.amount)),item:(al.title||"").trim()});
+      openEntry(null,{amount:Math.round(Number(al.amount)),item:(al.title||"").trim(),dir:al.direction==="in"?"in":"out"});
       if(/^\d{4}-\d{2}-\d{2}$/.test(al.date||"")) $("ent-date").value=al.date;
       entAfter();
       const rest=j.tasks.filter(x=>x!==al&&x.kind!=="allowance").map(x=>normalizeAI(x,text));
@@ -771,7 +820,9 @@ async function smartParse(text){
 function parseAllowance(raw){
   const s=raw.replace(/[。！!？?～~\s]/g,"");
   if(!/壯壯|零用錢/.test(s)) return null;
-  if(!/(買|花|付|用了|用掉)/.test(s)) return null;
+  /* 收入：給、紅包、獎勵、賺、存 */
+  const isIn=/(給|紅包|獎金|獎勵|賺|存入|存了|加零用錢|零用錢加)/.test(s);
+  if(!isIn && !/(買|花|付|用了|用掉)/.test(s)) return null;
   const m=s.match(/([0-9]{1,6}|[一二兩三四五六七八九十百千]{1,6})\s*(元|塊|圓)/);
   if(!m) return null;
   let amt=/^\d+$/.test(m[1])?+m[1]:zhNum(m[1]);
@@ -785,11 +836,20 @@ function parseAllowance(raw){
   if(!amt||amt<=0) return null;
   let rest=s.replace(/壯壯|零用錢|要記得|記得|幫我|今天|自己的/g,"").replace(m[0],"");
   let item;
+  if(isIn){
+    /* 「阿嬤給500元紅包」→ 紅包；「做家事賺50元」→ 做家事 */
+    const mr=rest.match(/(紅包|獎金|獎勵|禮金|零用錢)/);
+    const giver=rest.match(/^(.{1,6}?)給/);
+    const mw=rest.match(/(?:做|幫忙)(.{1,8}?)(?:賺|得到|拿到)?$/);
+    item=mr?mr[1]:(mw?"做"+mw[1]:(giver?giver[1]+"給的":""));
+    item=(item||"").replace(/^[的了，,、]+|[的了，,、]+$/g,"").trim();
+    return { amount:amt, item:item||"額外收入", dir:"in" };
+  }
   const mb=rest.match(/買(.+)$/);
   if(mb) item=mb[1];
   else item=rest.replace(/^(買|花了|花|付了|付|用了|用掉|用)/,"").replace(/(買|花了|花|付了|付|用)$/,"");
   item=item.replace(/^[的了用，,、]+|[的了，,、]+$/g,"").trim();
-  return { amount:amt, item:item||"消費" };
+  return { amount:amt, item:item||"消費", dir:"out" };
 }
 
 /* ================= 多筆待辦確認 ================= */
@@ -1300,8 +1360,9 @@ async function fetchInbox(){
     if(als.length&&bookCode&&moneyStarted()){
       let added=0;
       als.forEach(it=>{
-        if(it.amount>balance()){ toast("⚠️ Siri 記的「"+it.title+"」金額超過餘額，未記入"); return; }
-        const e={ id:it.id, date:/^\d{4}-\d{2}-\d{2}$/.test(it.date||"")?it.date:todayIso(),
+        const dir=it.direction==="in"?"in":"out";
+        if(dir==="out"&&it.amount>balance()){ toast("⚠️ Siri 記的「"+it.title+"」金額超過餘額，未記入"); return; }
+        const e={ id:it.id, kind:dir, date:/^\d{4}-\d{2}-\d{2}$/.test(it.date||"")?it.date:todayIso(),
           item:it.title||"", amount:Math.round(it.amount), by:deviceId(), byName:myName||"", ts:Date.now(), deleted:false };
         entries.unshift(e); pendAdd.push(e); added++;
       });
@@ -1431,8 +1492,10 @@ $("notif-btn").onclick=async()=>{
 function renderAll(){ renderToday(); if($("page-cal").classList.contains("show")) renderCal(); if($("page-hist").classList.contains("show")) renderHist(); if($("page-some").classList.contains("show")) renderSome(); if($("page-money").classList.contains("show")) renderMoney(); updateSomeBadge(); renderMoneyStrip(); checkReminders(); }
 /* ================= 壯壯零用錢（雲端共用帳本） ================= */
 const MONEY_START="2026-11";   /* 第一個月 */
-const MONEY_PER_MONTH=1000;    /* 每月入帳 */
-const QUICK_AMTS=[50,100,150,200,500];
+const MONEY_PER_MONTH=1000;    /* 起始的每月入帳金額（之後可用「調整金額」改） */
+const QUICK_AMTS=[50,100,150,200,500];          /* 支出常用金額 */
+const QUICK_IN=[100,200,500,1000,2000];         /* 收入常用金額 */
+const IN_REASONS=["紅包","做家事","考試獎勵","生日禮金"];
 
 const mstore={
   get(k,d){ try{ const v=localStorage.getItem(k); return v===null?d:JSON.parse(v); }catch(e){ return (memStore[k]!==undefined?memStore[k]:d); } },
@@ -1440,7 +1503,9 @@ const mstore={
 };
 let bookCode = mstore.get("memoBook",null);
 let myName   = mstore.get("memoName","");
-let entries  = mstore.get("memoEntries",[]);   /* [{id,date,item,amount,by,byName,ts,deleted}] */
+/* entries：[{id,kind,date,item,amount,by,byName,ts,deleted}]
+   kind："out"=支出（預設，舊資料沒有這欄也算支出）、"in"=額外收入、"rate"=從該月起每月改為 amount */
+let entries  = mstore.get("memoEntries",[]);
 let pendAdd  = mstore.get("memoPendAdd",[]);   /* 尚未確認同步的新增 */
 let pendDel  = mstore.get("memoPendDel",[]);   /* 尚未確認同步的刪除 */
 let members  = mstore.get("memoMembers",{});
@@ -1457,12 +1522,30 @@ function monthsSinceStart(){
   return Math.max(0,(n.getFullYear()-sy)*12+(n.getMonth()+1-sm)+1);
 }
 const activeEntries=()=>entries.filter(e=>!e.deleted);
+const kindOf=e=>e.kind==="in"||e.kind==="rate"?e.kind:"out";
 const moneyStarted=()=>monthsSinceStart()>0;
-function totalCredit(){ return monthsSinceStart()*MONEY_PER_MONTH; }
-function totalSpent(){ return activeEntries().reduce((s,e)=>s+e.amount,0); }
-function balance(){ return totalCredit()-totalSpent(); }
 function curMonth(){ const n=new Date(); return n.getFullYear()+"-"+pad(n.getMonth()+1); }
-function spentInMonth(m){ return activeEntries().filter(e=>e.date.slice(0,7)===m).reduce((s,e)=>s+e.amount,0); }
+function monthList(){
+  const [sy,sm]=MONEY_START.split("-").map(Number), out=[];
+  for(let i=0;i<monthsSinceStart();i++){ const d=new Date(sy,sm-1+i,1); out.push(d.getFullYear()+"-"+pad(d.getMonth()+1)); }
+  return out;
+}
+/* 每月金額：預設 MONEY_PER_MONTH，被生效月份在該月之前（含）的「調整」覆蓋 */
+const rateChanges=()=>activeEntries().filter(e=>kindOf(e)==="rate").sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:a.ts-b.ts);
+function rateFor(m){
+  let r=MONEY_PER_MONTH;
+  rateChanges().forEach(e=>{ if(e.date.slice(0,7)<=m) r=e.amount; });
+  return r;
+}
+const inMonth=(m,k)=>activeEntries().filter(e=>kindOf(e)===k&&e.date.slice(0,7)===m).reduce((s,e)=>s+e.amount,0);
+function spentInMonth(m){ return inMonth(m,"out"); }
+function incomeInMonth(m){ return inMonth(m,"in"); }
+function totalCredit(){ return monthList().reduce((s,m)=>s+rateFor(m),0); }
+function totalExtra(){ return activeEntries().filter(e=>kindOf(e)==="in").reduce((s,e)=>s+e.amount,0); }
+function totalSpent(){ return activeEntries().filter(e=>kindOf(e)==="out").reduce((s,e)=>s+e.amount,0); }
+function balance(){ return totalCredit()+totalExtra()-totalSpent(); }
+/* 本月可用額度＝當月零用錢＋當月額外收入 */
+const monthQuota=m=>rateFor(m)+incomeInMonth(m);
 const money=n=>"$"+Number(n).toLocaleString("en-US");
 
 /* ---------- 同步 ---------- */
@@ -1515,127 +1598,250 @@ function renderMoneyStrip(){
   if(!moneyStarted()){
     $("ms-v").innerHTML=`<span style="font-size:15px;">${MONEY_START.replace("-","年")}月開始</span> <small>每月 ${money(MONEY_PER_MONTH)}</small>`;
   }else{
-    const left=MONEY_PER_MONTH-spentInMonth(curMonth());
+    const m=curMonth(), left=monthQuota(m)-spentInMonth(m);
     $("ms-v").innerHTML=`${money(balance())} <small>本月還有 ${money(Math.max(0,left))}</small>`;
   }
 }
 
 /* ---------- 零用錢主畫面 ---------- */
 function renderMoney(){
-  const started=moneyStarted();
-  const bal=balance(), used=spentInMonth(curMonth());
+  const started=moneyStarted(), m0=curMonth();
+  const bal=balance(), used=spentInMonth(m0), quota=monthQuota(m0);
   $("bal-v").innerHTML=`<span>$</span>${started?Number(bal).toLocaleString("en-US"):"0"}`;
-  $("bal-bar").style.width=started?Math.min(100,Math.round(used/MONEY_PER_MONTH*100))+"%":"0%";
+  $("bal-bar").style.width=started?Math.min(100,Math.round(used/Math.max(1,quota)*100))+"%":"0%";
   $("bal-used").textContent=started?"本月已用 "+money(used):"尚未開始";
-  $("bal-quota").textContent="本月額度 "+money(MONEY_PER_MONTH);
+  $("bal-quota").textContent="本月額度 "+money(started?quota:MONEY_PER_MONTH);
   $("money-sub").textContent=bookCode?("帳本代碼 "+bookCode):"壯壯的零用錢帳本";
   $("bal-sync-t").textContent=syncLabel();
   $("bal-sync").querySelector(".dotg").className="dotg"+((pendAdd.length||pendDel.length||!lastSync)?" off":"");
+  const upcoming=rateChanges().filter(e=>e.date.slice(0,7)>m0);
+  $("rate-now").innerHTML=money(rateFor(m0))
+    + (upcoming.length?`<span class="soon">${+upcoming[0].date.slice(5,7)} 月起 ${money(upcoming[0].amount)}</span>`:"");
   const list=$("money-list");
   if(!started){
     list.innerHTML=`<div class="empty-state">零用錢從 ${MONEY_START.split("-")[0]} 年 ${+MONEY_START.split("-")[1]} 月開始 🗓️<br>每月 1 號自動入帳 ${money(MONEY_PER_MONTH)}<br>用不完會累積到下個月</div>`;
     return;
   }
   /* 由起始月往現在累加，再倒著列出 */
-  const [sy,sm]=MONEY_START.split("-").map(Number);
   const months=[]; let run=0;
-  for(let i=0;i<monthsSinceStart();i++){
-    const d=new Date(sy,sm-1+i,1), m=d.getFullYear()+"-"+pad(d.getMonth()+1);
-    const open=run; run+=MONEY_PER_MONTH;
-    const sp=spentInMonth(m); run-=sp;
-    months.push({m,open,sp,close:run,y:d.getFullYear(),mo:d.getMonth()+1});
-  }
+  monthList().forEach(m=>{
+    const credit=rateFor(m), sp=spentInMonth(m), inc=incomeInMonth(m);
+    const open=run; run+=credit+inc-sp;
+    const [y,mo]=m.split("-").map(Number);
+    months.push({m,open,credit,sp,inc,close:run,y,mo});
+  });
   let h="";
   months.reverse().forEach(x=>{
     const rows=activeEntries().filter(e=>e.date.slice(0,7)===x.m)
       .sort((a,b)=>a.date<b.date?1:a.date>b.date?-1:b.ts-a.ts);
     h+=`<div class="mhead"><span class="mh1">${x.y} 年 ${x.mo} 月</span><span class="mh2">結餘 ${money(x.close)}</span></div>`;
-    h+=`<div class="msum">${x.open?`上月結餘 ${money(x.open)}　＋　`:""}本月入帳 <b>${money(MONEY_PER_MONTH)}</b>　－　支出 ${money(x.sp)}${x.sp===0?"　（整月沒花，全部累積）":""}</div>`;
+    h+=`<div class="msum">${x.open?`上月結餘 ${money(x.open)}　＋　`:""}本月入帳 <b>${money(x.credit)}</b>${x.inc?`　＋　額外收入 <b>${money(x.inc)}</b>`:""}　－　支出 ${money(x.sp)}${(x.sp===0&&!x.inc)?"　（整月沒花，全部累積）":""}</div>`;
     h+=`<div class="rows">`;
     rows.forEach(e=>{
-      h+=`<button class="erow" data-id="${e.id}"><span class="ed">${(+e.date.slice(5,7))}/${e.date.slice(8,10)}</span>
-        <span class="ei">${escapeHtml(e.item||"（未填品項）")}${e.byName?`<small>${escapeHtml(e.byName)}記的</small>`:""}</span>
-        <span class="ea">-${money(e.amount)}</span></button>`;
+      const k=kindOf(e), d=`${(+e.date.slice(5,7))}/${e.date.slice(8,10)}`;
+      const who=e.byName?`<small>${escapeHtml(e.byName)}記的</small>`:"";
+      if(k==="rate"){
+        h+=`<button class="erow raterow" data-id="${e.id}"><span class="ed">${d}</span>
+          <span class="ei">🔧 每月零用錢改為 ${money(e.amount)}${who}</span><span class="ea">調整</span></button>`;
+      }else{
+        h+=`<button class="erow${k==="in"?" inrow":""}" data-id="${e.id}"><span class="ed">${d}</span>
+          <span class="ei">${k==="in"?"🎁 ":""}${escapeHtml(e.item||(k==="in"?"額外收入":"（未填品項）"))}${who}</span>
+          <span class="ea">${k==="in"?"+":"-"}${money(e.amount)}</span></button>`;
+      }
     });
-    h+=`<div class="erow inrow"><span class="ed">${x.mo}/1</span><span class="ei">每月零用錢</span><span class="ea">+${money(MONEY_PER_MONTH)}</span></div></div>`;
+    h+=`<div class="erow inrow"><span class="ed">${x.mo}/1</span><span class="ei">每月零用錢</span><span class="ea">+${money(x.credit)}</span></div></div>`;
   });
   list.innerHTML=h;
   list.querySelectorAll(".erow[data-id]").forEach(el=>{
-    el.onclick=()=>openEntry(entries.find(e=>e.id===el.dataset.id));
+    el.onclick=()=>{ const e=entries.find(x=>x.id===el.dataset.id); if(kindOf(e)==="rate") openRate(e); else openEntry(e); };
   });
 }
 
-/* ---------- 記一筆 ---------- */
-let editEntry=null;
-function openEntry(e,preset){
-  if(!bookCode){ setupBook(); return; }
-  if(!moneyStarted()){ toast("零用錢從 "+MONEY_START.split("-")[1]+" 月才開始喔"); return; }
-  editEntry=e||null;
-  $("ent-head").textContent=e?"✏️ 修改這筆消費":"💰 記一筆消費";
-  $("ent-amt").value=e?e.amount:(preset&&preset.amount?preset.amount:"");
-  $("ent-item").value=e?e.item:(preset&&preset.item?preset.item:"");
-  $("ent-date").value=e?e.date:todayIso();
-  $("ent-delrow").style.display=e?"flex":"none";
+/* ---------- 記一筆（支出／收入） ---------- */
+let editEntry=null, entDir="out";
+const newEntryId=()=>deviceId().slice(0,6)+Date.now().toString(36)+Math.floor(Math.random()*999);
+function setEntDir(d){
+  entDir=d;
+  $("ent-dir-out").classList.toggle("sel",d==="out");
+  $("ent-dir-in").classList.toggle("sel",d==="in");
+  $("ent-head").textContent = editEntry
+    ? (d==="in"?"✏️ 修改這筆收入":"✏️ 修改這筆消費")
+    : (d==="in"?"🎁 幫壯壯加錢":"💰 記一筆消費");
+  $("ent-item-lab").textContent = d==="in" ? "原因／來源" : "買了什麼";
+  $("ent-item").placeholder = d==="in" ? "例如：阿嬤給的紅包" : "例如：航海王漫畫";
+  $("ent-save").textContent = d==="in" ? "✓ 加進零用錢" : "✓ 記下來";
   const q=$("ent-quick"); q.innerHTML="";
-  QUICK_AMTS.forEach(a=>{
+  (d==="in"?QUICK_IN:QUICK_AMTS).forEach(a=>{
     const b=document.createElement("button"); b.className="catopt"; b.textContent="$"+a;
     b.onclick=()=>{ $("ent-amt").value=a; entAfter(); };
     q.appendChild(b);
   });
+  const rs=$("ent-reasons");
+  if(d==="in"){
+    rs.style.display="flex"; rs.innerHTML="";
+    IN_REASONS.forEach(t=>{
+      const b=document.createElement("button"); b.className="catopt"; b.textContent=t;
+      b.onclick=()=>{ $("ent-item").value=t; };
+      rs.appendChild(b);
+    });
+  } else rs.style.display="none";
   entAfter();
+}
+function openEntry(e,preset){
+  if(!bookCode){ setupBook(); return; }
+  if(!moneyStarted()){ toast("零用錢從 "+MONEY_START.split("-")[1]+" 月才開始喔"); return; }
+  editEntry=e||null;
+  $("ent-amt").value=e?e.amount:(preset&&preset.amount?preset.amount:"");
+  $("ent-item").value=e?e.item:(preset&&preset.item?preset.item:"");
+  $("ent-date").value=e?e.date:todayIso();
+  $("ent-delrow").style.display=e?"flex":"none";
+  setEntDir(e?kindOf(e):((preset&&preset.dir)||"out"));
   $("ent-overlay").classList.add("show");
 }
 function entAfter(){
   const amt=Math.round(Number($("ent-amt").value)||0);
-  const avail=balance()+(editEntry?editEntry.amount:0);
   const box=$("ent-after"), btn=$("ent-save");
   if(amt<=0){
-    box.className="after"; box.innerHTML=`可用餘額 <b>${money(balance())}</b>`;
+    box.className="after"; box.innerHTML=`目前可用 <b>${money(balance())}</b>`;
     btn.classList.add("off"); return;
   }
+  if(entDir==="in"){
+    const base=balance()-(editEntry&&kindOf(editEntry)==="in"?editEntry.amount:0)+(editEntry&&kindOf(editEntry)==="out"?editEntry.amount:0);
+    box.className="after";
+    box.innerHTML=`加完後會有 <b>${money(base+amt)}</b><small>目前 ${money(balance())}，增加 ${money(amt)}</small>`;
+    btn.classList.remove("off"); return;
+  }
+  /* 支出：可用額度要把正在編輯的那筆先還原 */
+  const avail=balance()+(editEntry?(kindOf(editEntry)==="out"?editEntry.amount:-editEntry.amount):0);
   if(amt>avail){
     box.className="after bad";
-    box.innerHTML=`餘額不足，最多只能用 <b>${money(avail)}</b><small>零用錢不能預支，再存 ${money(amt-avail)} 就夠囉</small>`;
+    box.innerHTML=`餘額不足，最多只能用 <b>${money(Math.max(0,avail))}</b><small>零用錢不能預支，再存 ${money(amt-avail)} 就夠囉</small>`;
     btn.classList.add("off"); return;
   }
-  const left=avail-amt;
-  const mleft=MONEY_PER_MONTH-spentInMonth(curMonth())-amt+(editEntry&&editEntry.date.slice(0,7)===curMonth()?editEntry.amount:0);
+  const m0=curMonth();
+  const back=editEntry&&editEntry.date.slice(0,7)===m0&&kindOf(editEntry)==="out"?editEntry.amount:0;
+  const mleft=monthQuota(m0)-spentInMonth(m0)-amt+back;
   box.className="after";
-  box.innerHTML=`記錄後還剩 <b>${money(left)}</b><small>本月額度還有 ${money(Math.max(0,mleft))}</small>`;
+  box.innerHTML=`記錄後還剩 <b>${money(avail-amt)}</b><small>本月額度還有 ${money(Math.max(0,mleft))}</small>`;
   btn.classList.remove("off");
 }
 $("ent-amt").addEventListener("input",entAfter);
-$("ent-cancel").onclick=()=>$("ent-overlay").classList.remove("show");
+$("ent-dir-out").onclick=()=>setEntDir("out");
+$("ent-dir-in").onclick=()=>setEntDir("in");
+$("ent-cancel").onclick=()=>{ $("ent-overlay").classList.remove("show"); editEntry=null; };
 $("ent-save").onclick=()=>{
   const amt=Math.round(Number($("ent-amt").value)||0);
-  const avail=balance()+(editEntry?editEntry.amount:0);
   if(amt<=0){ toast("請輸入金額"); return; }
-  if(amt>avail){ toast("餘額不足，不能預支"); return; }
+  if(entDir==="out"){
+    const avail=balance()+(editEntry?(kindOf(editEntry)==="out"?editEntry.amount:-editEntry.amount):0);
+    if(amt>avail){ toast("餘額不足，不能預支"); return; }
+  }
   const date=$("ent-date").value||todayIso();
   if(date.slice(0,7)<MONEY_START){ toast("日期不能早於 "+MONEY_START.split("-")[1]+" 月"); return; }
   const item=$("ent-item").value.trim();
+  const wasEdit=!!editEntry;
   if(editEntry){
     /* 修改＝刪舊的、開新的，確保兩支手機合併後一致 */
     editEntry.deleted=true; pendDel.push(editEntry.id);
   }
-  const e={ id:deviceId().slice(0,6)+Date.now().toString(36)+Math.floor(Math.random()*999),
-    date, item, amount:amt, by:deviceId(), byName:myName||"", ts:Date.now(), deleted:false };
+  const e={ id:newEntryId(), kind:entDir, date, item, amount:amt,
+    by:deviceId(), byName:myName||"", ts:Date.now(), deleted:false };
   entries.unshift(e); pendAdd.push(e);
+  editEntry=null;
   saveMoney(); renderMoneyStrip(); renderMoney();
   $("ent-overlay").classList.remove("show");
-  toast(editEntry?"✓ 已更新":"✓ 已記下，還剩 "+money(balance()));
-  editEntry=null;
+  toast(wasEdit?"✓ 已更新，目前 "+money(balance())
+       :(entDir==="in"?"🎁 已加入，目前 "+money(balance()):"✓ 已記下，還剩 "+money(balance())));
   syncBook(true);
 };
 $("ent-del").onclick=()=>{
   if(!editEntry) return;
   editEntry.deleted=true; pendDel.push(editEntry.id);
+  editEntry=null;
   saveMoney(); renderMoneyStrip(); renderMoney();
   $("ent-overlay").classList.remove("show");
   toast("已刪除，餘額回到 "+money(balance()));
-  editEntry=null;
   syncBook(true);
 };
+
+/* ---------- 調整每月金額 ---------- */
+let editRate=null;
+function nextMonthStr(){ const n=new Date(); const d=new Date(n.getFullYear(),n.getMonth()+1,1); return d.getFullYear()+"-"+pad(d.getMonth()+1); }
+function openRate(e){
+  if(!bookCode){ setupBook(); return; }
+  editRate=e||null;
+  const m0=curMonth();
+  $("rate-head").textContent=editRate?"🔧 修改這次調整":"🔧 調整每月零用錢";
+  $("rate-cur").innerHTML=`目前每月 <b>${money(rateFor(m0))}</b>`;
+  $("rate-amt").value=editRate?editRate.amount:"";
+  $("rate-from").value=(editRate?editRate.date:nextMonthStr()+"-01").slice(0,7);
+  $("rate-delrow").style.display=editRate?"flex":"none";
+  rateAfter();
+  renderRateList();
+  $("rate-overlay").classList.add("show");
+}
+function rateAfter(){
+  const amt=Math.round(Number($("rate-amt").value)||0);
+  const from=$("rate-from").value||"";
+  const box=$("rate-after"), btn=$("rate-save");
+  if(amt<=0||!/^\d{4}-\d{2}$/.test(from)){
+    box.className="after"; box.innerHTML="請輸入新的金額和生效月份";
+    btn.classList.add("off"); return;
+  }
+  if(from<MONEY_START){
+    box.className="after bad"; box.innerHTML=`生效月份不能早於 ${MONEY_START.split("-")[0]} 年 ${+MONEY_START.split("-")[1]} 月`;
+    btn.classList.add("off"); return;
+  }
+  const [y,m]=from.split("-").map(Number);
+  const old=rateFor(from);
+  const diff=amt-old;
+  box.className="after";
+  box.innerHTML=`從 <b>${y} 年 ${m} 月</b>起，每月改為 <b>${money(amt)}</b>`
+    +`<small>${diff===0?"金額沒有變動":(diff>0?"比目前多 "+money(diff):"比目前少 "+money(-diff))}・之前的月份不受影響</small>`;
+  btn.classList.remove("off");
+}
+function renderRateList(){
+  const rs=rateChanges();
+  $("rate-list").innerHTML = rs.length
+    ? `<label style="display:block;font-size:12.5px;font-weight:700;color:#9a938a;margin:14px 0 6px;">已設定的調整（點一下可修改）</label>`
+      + rs.map(e=>{
+          const [y,m]=e.date.split("-").map(Number);
+          return `<button class="who" data-id="${e.id}" style="width:100%;"><span class="av">🔧</span>${y} 年 ${m} 月起 ${money(e.amount)}<span class="tag">${escapeHtml(e.byName||"")}</span></button>`;
+        }).join("")
+    : "";
+  $("rate-list").querySelectorAll("[data-id]").forEach(el=>{
+    el.onclick=()=>openRate(entries.find(x=>x.id===el.dataset.id));
+  });
+}
+$("rate-amt").addEventListener("input",rateAfter);
+$("rate-from").addEventListener("change",rateAfter);
+$("rate-cancel").onclick=()=>{ $("rate-overlay").classList.remove("show"); editRate=null; };
+$("rate-save").onclick=()=>{
+  const amt=Math.round(Number($("rate-amt").value)||0);
+  const from=$("rate-from").value||"";
+  if(amt<=0||!/^\d{4}-\d{2}$/.test(from)){ toast("請輸入金額和生效月份"); return; }
+  if(from<MONEY_START){ toast("生效月份太早"); return; }
+  if(editRate){ editRate.deleted=true; pendDel.push(editRate.id); }
+  const e={ id:newEntryId(), kind:"rate", date:from+"-01", item:"每月零用錢調整", amount:amt,
+    by:deviceId(), byName:myName||"", ts:Date.now(), deleted:false };
+  entries.unshift(e); pendAdd.push(e);
+  editRate=null;
+  saveMoney(); renderMoneyStrip(); renderMoney();
+  $("rate-overlay").classList.remove("show");
+  const [y,m]=from.split("-").map(Number);
+  toast(`✓ ${y} 年 ${m} 月起每月 ${money(amt)}`);
+  syncBook(true);
+};
+$("rate-del").onclick=()=>{
+  if(!editRate) return;
+  editRate.deleted=true; pendDel.push(editRate.id);
+  editRate=null;
+  saveMoney(); renderMoneyStrip(); renderMoney();
+  $("rate-overlay").classList.remove("show");
+  toast("已取消這次調整");
+  syncBook(true);
+};
+$("rate-row").onclick=()=>openRate(null);
 
 /* ---------- 共用設定 ---------- */
 function setupBook(){
@@ -1679,10 +1885,11 @@ $("share-join").onclick=()=>{
 };
 $("money-share").onclick=openShare;
 $("money-back").onclick=()=>showPage("today");
-$("money-add").onclick=()=>openEntry(null);
+$("money-add").onclick=()=>openEntry(null,{dir:"out"});
+$("money-in").onclick=()=>openEntry(null,{dir:"in"});
 $("bal-sync").onclick=()=>{ toast("重新同步中…"); syncBook(false); };
 $("money-strip").onclick=()=>{ if(!bookCode){ setupBook(); return; } renderMoney(); showPage("money"); syncBook(false); };
-$("ms-add").onclick=ev=>{ ev.stopPropagation(); if(!bookCode){ setupBook(); return; } openEntry(null); };
+$("ms-add").onclick=ev=>{ ev.stopPropagation(); if(!bookCode){ setupBook(); return; } openEntry(null,{dir:"out"}); };
 
 (function init(){
   const n=new Date();
